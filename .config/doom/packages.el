@@ -55,4 +55,5 @@
 (package! format-all)
 (package! visual-fill-column)
 (package! org-superstar)
-(package! blamer)
+(package! vterm)
+;;(package! org-fragtog)

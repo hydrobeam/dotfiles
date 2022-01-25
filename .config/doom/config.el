@@ -31,7 +31,7 @@
 (setq make-backup-files t)
 (setq confirm-kill-emacs nil)
 
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-one-light)
 
 
 (add-to-list 'default-frame-alist `(fullscreen))
@@ -88,7 +88,7 @@
       '(("frame" "lines") ("linenos=true") ("breaklines" "true") ("breakanywhere" "true")
         ))
 
-(setq org-format-latex-options (plist-put org-format-latex-options :scale 2.5))
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.0))
 (setq org-latex-listings 'minted)
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -131,23 +131,45 @@
 
 (defun efs/org-mode-visual-fill()
   (setq
-        visual-fill-column-center-text t)
+   visual-fill-column-center-text t)
   (setq visual-fill-column-width 110)
   (visual-fill-column-mode 1))
 
 (use-package visual-fill-column
   :hook (org-mode . efs/org-mode-visual-fill))
+;;
+;;(use-package blamer
+;;:ensure t
+;;:defer 20
+;;:custom
+;;(blamer-idle-time 0.3)
+;;(blamer-min-offset 70)
+;;:custom-face
+;;(blamer-face ((t :foreground "#7a88cf"
+;;:background nil
+;;:height 140
+;;:italic t)))
+;;:config
+;;(global-blamer-mode 1))
+;;
 
-(use-package blamer
-  :ensure t
-  :defer 20
-  :custom
-  (blamer-idle-time 0.3)
-  (blamer-min-offset 70)
-  :custom-face
-  (blamer-face ((t :foreground "#7a88cf"
-                    :background nil
-                    :height 140
-                    :italic t)))
-  :config
-  (global-blamer-mode 1))
+(display-time-mode 1)
+;;(add-hook 'org-mode-hook 'org-fragtog-mode)
+;;
+;; add <pl for python latex expansion
+(add-to-list 'org-modules 'org-tempo t)
+
+(add-to-list 'org-structure-template-alist '("pl" . "src python :session :results replace raw :exports none"))
+
+(defun screenshot-svg ()
+  "Save a screenshot of the current frame as an SVG image.
+Saves to a temp file and puts the filename in the kill ring."
+  (interactive)
+  (let* ((filename (make-temp-file "Emacs" nil ".svg"))
+         (data (x-export-frames nil 'svg)))
+    (with-temp-file filename
+      (insert data))
+    (kill-new filename)
+    (message filename)))
+
+
