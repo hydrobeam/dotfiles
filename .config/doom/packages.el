@@ -59,6 +59,7 @@
 ;; make bullet points nicer in org mode
 (package! org-superstar)
 
+(package! tempo)
 ;; automatically toggle latex inline preview
 ;;(package! org-fragtog)
 
@@ -67,3 +68,5 @@
 ;;(package! pdf-continuous-scroll-mode :recipe
 ;;  (:host github
 ;;   :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
+
+

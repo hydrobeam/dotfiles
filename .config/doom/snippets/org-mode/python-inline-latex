@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: display python-inline-latex
+# key: <pil
+# --
+
+src_python[:session :results replace raw :exports none]{$0}

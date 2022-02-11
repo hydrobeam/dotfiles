@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: inline c
+# key: <ic
+# --
+
+src_c[:exports code]{$0}

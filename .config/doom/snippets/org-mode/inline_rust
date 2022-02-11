@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: inline rust
+# key: <irs
+# --
+
+src_rust[:exports code]{$0}

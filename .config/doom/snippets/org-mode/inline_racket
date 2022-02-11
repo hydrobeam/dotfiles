@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: inline racket
+# key: <ira
+# --
+
+src_racket[:exports code]{$0}

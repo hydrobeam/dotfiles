@@ -2,10 +2,7 @@
 
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
-
-
-;; Some functionality uses this to identify you, e.g. GPG configuration, email
-;; clients, file templates and snippets.
+;; Some functionality uses this to identify you, e.g. GPG configuration, email clients, file templates and snippets.
 (setq user-full-name "Laith Bahodi"
       user-mail-address "laithbahodi@gmail.com")
 
@@ -115,6 +112,7 @@
                             :image-size-adjust (1.0 . 1.0)
                             :latex-compiler ("lualatex -interaction nonstopmode -output-directory %o %f")
                             :image-converter ("convert -density %D -trim -antialias %f -quality 100 %O")))
+
 (add-to-list 'org-preview-latex-process-alist luamagick)
 (setq org-preview-latex-default-process 'luamagick) ;; lowkey no idea
 
@@ -127,18 +125,15 @@
 
 (add-to-list 'org-latex-packages-alist '("" "minted"))
 (setq org-latex-listings 'minted)
-(setq org-highlight-latex-and-related '(latex script entities))
+;;
+;;
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((racket . T)
    (rust . T)
    (python . T)
-   (C . t)
-   (haskell . T)))
-
-
-;;; config.el ends here
+   (C . t) (haskell . T)))
 
 
 (setq org-pomodoro-length 30)
@@ -149,7 +144,7 @@
 (defun dw/org-mode-setup ()
   (org-indent-mode)
   (visual-line-mode)
-  ;; (variable-pitch-mode)
+  ;; (variable-pitch-mode) turns off source code mode
   (setq evil-auto-indent nil))
 
 (use-package org
@@ -181,9 +176,7 @@
 (display-time-mode 1)
 ;;(add-hook 'org-mode-hook 'org-fragtog-mode)
 ;;
-;; add <pl for python latex expansion
-(add-to-list 'org-modules 'org-tempo t)
-(add-to-list 'org-structure-template-alist '("pl" . "src python :session :results replace raw :exports none"))
+(add-to-list 'org-modules 'org-tempo t) ;; need this to not be asked which snippet i want to expand
 
 (defun screenshot-svg ()
   "Save a screenshot of the current frame as an SVG image.
@@ -210,3 +203,14 @@ Saves to a temp file and puts the filename in the kill ring."
   (shell-command (concat "xclip -selection clipboard -t image/jpg -o > " file ".jpg"))
   (insert (concat "[[" file ".jpg]]"))
   (org-display-inline-images))
+
+;; allows you to C-w C-w to treemacs
+(setq treemacs-is-never-other-window nil)
+(setq doom-themes-treemacs-theme "doom-colors")
+
+;; get rid of those little things on the side
+;; helps space out the buffer but idc :cold_face:
+(setq fringe-styles "no-fringes")
+
+;; just looks kinda bad with certain themes
+;; (setq org-highlight-latex-and-related '(latex script entities))

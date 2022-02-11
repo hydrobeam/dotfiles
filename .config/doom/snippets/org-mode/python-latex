@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: display python-latex
+# key: <pl
+# --
+
+#+begin_src python :session :results replace raw :exports none
+$0
+#+end_src
