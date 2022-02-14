@@ -22,7 +22,7 @@ window:
 
   position:
     x: 160
-    y: 160
+    y: 168
 
   # Window position (changes require restart)
   #
@@ -98,6 +98,10 @@ scrolling:
 # change the `it` value in terminfo when altering this setting.
 tabspaces: 8
 
+
+selection: 
+  # lets you copy paste with ctrl-c :W:
+  save_to_clipboard: true
 # Font configuration (changes require restart)
 font:
   normal:

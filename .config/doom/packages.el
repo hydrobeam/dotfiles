@@ -59,9 +59,10 @@
 ;; make bullet points nicer in org mode
 (package! org-superstar)
 
-(package! tempo)
 ;; automatically toggle latex inline preview
 ;;(package! org-fragtog)
+;;
+(package! rmsbolt)
 
 
 ;; need to compile emacs with svg support :weary:
