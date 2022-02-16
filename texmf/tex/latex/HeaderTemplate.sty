@@ -1,0 +1,11 @@
+\usepackage{fancyhdr}
+% Setup style for fancyheader
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\bfseries \CourseNumber}
+\rhead{Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+% avoid annoying compilation warnings
+% https://tex.stackexchange.com/questions/327285/what-does-this-warning-mean-fancyhdr-and-headheight
+\setlength{\headheight}{13.6pt}
