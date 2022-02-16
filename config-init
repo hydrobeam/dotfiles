@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+function mvp ()
+{
+    dir="$2" # Include a / at the end to indicate directory (not filename)
+    tmp="$2"; tmp="${tmp: -1}"
+    [ "$tmp" != "/" ] && dir="$(dirname "$2")"
+    [ -a "$dir" ] ||
+    mkdir -p "$dir" &&
+    mv "$@"
+}
+
 git clone --bare https://github.com/hydrobeam/dotfiles.git $HOME/.dotfiles
 # define config alias locally since the dotfiles
 # aren't installed on the system yet
@@ -13,7 +23,7 @@ if [ $? = 0 ]; then
   echo "Checked out dotfiles from https://github.com/hydrobeam/dotfiles.git";
   else
     echo "Moving existing dotfiles to ~/.dotfiles-backup";
-    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{} mkdir -p {} && mv  {} .dotfiles-backup/{}
+    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{}  mvp  {} .dotfiles-backup/{}
 fi
 # checkout dotfiles from repo
 config checkout

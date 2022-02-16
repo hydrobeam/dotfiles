@@ -1,4 +1,36 @@
 
-* Readme
-My configuration files for Emacs, Vim, Alacritty and Fish.
+* Dotfiles
 
+
+** Overview
+My configuration files for *Emacs*, *Vim*, *Alacritty* and *Fish* and *LaTeX*.
+
+The *texmf* directory holds the templates that I commonly use for *LaTeX* files. Keep in mind that I use =minted=, which requires compilation with the =-shell-escape= flag, and the Python =pygments= package.
+
+
+#+BEGIN_SRC bash
+pip install pygments
+#+END_SRC
+
+
+** Setup/Installation
+
+
+Setup was done by following [[https://mjones44.medium.com/storing-dotfiles-in-a-git-repository-53f765c0005d][this guide]].
+
+To add files to be tracked:
+
+#+begin_src bash
+config add /path/to/file/cool.rs
+config commit -m "Added cool.rs"
+config push
+#+end_src
+
+
+To install on a new system, run the following command:
+
+#+begin_src bash
+curl https://raw.githubusercontent.com/hydrobeam/dotfiles/main/config-init | bash
+#+end_src
+
+This will (in theory), move conflicting config setups to =.dotfiles-backup=, and insert the ones here in their place.
