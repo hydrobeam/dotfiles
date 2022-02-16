@@ -23,7 +23,7 @@ if [ $? = 0 ]; then
   echo "Checked out dotfiles from https://github.com/hydrobeam/dotfiles.git";
   else
     echo "Moving existing dotfiles to ~/.dotfiles-backup";
-    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{}  mvp  {} .dotfiles-backup/{}
+    config checkout 2>&1 | egrep "\s+\." | awk {'print $1'} | xargs -I{}  mvp {} .dotfiles-backup/{}
 fi
 # checkout dotfiles from repo
 config checkout
