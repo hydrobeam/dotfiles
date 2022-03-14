@@ -49,5 +49,8 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     Plug 'junegunn/goyo.vim'
     " have a floating terminal window
     Plug 'voldikss/vim-floaterm'
+    " what it says on the tin
+    Plug 'plasticboy/vim-markdown'
+
 call plug#end()
 

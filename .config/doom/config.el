@@ -90,8 +90,8 @@
   (setq! lsp-rust-analyzer-server-display-inlay-hints t
          lsp-rust-analyzer-inlay-hints-mode t
          ))
+(setq lsp-idle-delay 0.100)
 
-(setq tramp-default-method "ssh")
 (require 'org)
 (require 'ox-latex)
 ;;(setq org-latex-pdf-process
@@ -176,7 +176,11 @@
 (display-time-mode 1)
 ;;(add-hook 'org-mode-hook 'org-fragtog-mode)
 ;;
-(add-to-list 'org-modules 'org-tempo t) ;; need this to not be asked which snippet i want to expand
+;;
+
+;; unecssary with actual snippets now
+;;(add-to-list 'org-modules 'org-tempo t) ;; need this to not be asked which snippet i want to expand
+(add-to-list 'org-latex-logfiles-extensions "tex")
 
 (defun screenshot-svg ()
   "Save a screenshot of the current frame as an SVG image.
@@ -214,3 +218,8 @@ Saves to a temp file and puts the filename in the kill ring."
 
 ;; just looks kinda bad with certain themes
 ;; (setq org-highlight-latex-and-related '(latex script entities))
+(setq auth-sources nil)
+
+;;(require 'tramp)
+;;(setq tramp-debug-buffer t)
+;;(setq tramp-verbose 10)

@@ -52,6 +52,7 @@
 
 (package! tree-sitter)
 (package! tree-sitter-langs)
+
 ;; toolkit to defaultly format all languages
 (package! format-all)
 ;; center emacs org mode
@@ -62,6 +63,8 @@
 ;; automatically toggle latex inline preview
 ;;(package! org-fragtog)
 ;;
+;;
+;;(package! treemacs)
 (package! rmsbolt)
 
 

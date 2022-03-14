@@ -49,6 +49,7 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 nmap <leader>rn <Plug>(coc-rename)
 let g:coc_disable_transparent_cursor = 1
+let g:coc_global_extensions = ['coc-json', 'coc-rust-analyzer', 'coc-pyright']
 
 let g:LanguageClient_serverCommands = {
     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],
@@ -60,5 +61,12 @@ inoremap <silent><expr> <TAB>
 inoremap <C-l> <Esc>:call unicoder#start(1)<CR>
 
 tnoremap <Esc> <C-\><C-n>
+
+" Markdown
+let g:vim_markdown_fenced_languages = ['rust=rs']
+let g:vim_markdown_math = 1
+let g:vim_markdown_frontmatter =1
+let g:vim_markdown_toml_frontmatter =1
+let g:vim_markdown_folding_disabled = 1
 
 filetype plugin indent on
