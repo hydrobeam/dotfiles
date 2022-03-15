@@ -11,6 +11,19 @@
 # check the local terminfo database and use `alacritty` if it is
 # available, otherwise `xterm-256color` is used.
 #TERM: xterm-256color
+
+
+cursor:
+  # Cursor style
+  style:
+    # Cursor shape
+    #
+    # Values for `shape`:
+    #   - ▇ Block
+    #   - _ Underline
+    #   - | Beam
+    shape: Beam
+
 window:
   # Window dimensions (changes require restart)
   #
