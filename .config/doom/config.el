@@ -23,7 +23,7 @@
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
 
-(setq doom-font (font-spec :family "JetBrainsMono" :size 13.5))
+(setq doom-font (font-spec :family "Jetbrains Mono" :size 13.5))
 ;; must set alternate font too
 ;; or else the font goes to shit
 
@@ -90,19 +90,17 @@
   (setq! lsp-rust-analyzer-server-display-inlay-hints t
          lsp-rust-analyzer-inlay-hints-mode t
          ))
-(setq lsp-idle-delay 0.100)
+;;(setq lsp-idle-delay 0.100)
 
 (require 'org)
 (require 'ox-latex)
-;;(setq org-latex-pdf-process
-;;    '("pdflatex -shell-escape -interaction nonstopmode -output-directory %o %f"))
 
 ;; lualatex preview
 (setq org-latex-pdf-process
       '("lualatex -shell-escape -interaction nonstopmode %f"
         "lualatex -shell-escape -interaction nonstopmode %f"))
 
-;; :shrug:
+;; :stolen from somewhere🤷:
 (setq luamagick '(luamagick :programs ("lualatex" "convert")
                             :description "pdf > png"
                             :message "you need to install lualatex and imagemagick."
@@ -123,10 +121,11 @@
       '(("linenos=true") ("breaklines" "true") ("breakanywhere" "true") ("numbersep=5pt")
         ))
 
+;; use minted for code rendering
 (add-to-list 'org-latex-packages-alist '("" "minted"))
 (setq org-latex-listings 'minted)
-;;
-;;
+
+;; makes latex preview bigger
 (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
 (org-babel-do-load-languages
  'org-babel-load-languages
@@ -153,7 +152,7 @@
   (setq org-ellipsis " ▾"
         ))
 
-;; Nice bullets
+;; Nice bullets in org
 (use-package org-superstar
   :config
   (setq org-superstar-special-todo-items t)
@@ -173,13 +172,10 @@
   :hook (org-mode . efs/org-mode-visual-fill))
 ;;
 
+;; adds time to modeline
 (display-time-mode 1)
-;;(add-hook 'org-mode-hook 'org-fragtog-mode)
-;;
-;;
 
-;; unecssary with actual snippets now
-;;(add-to-list 'org-modules 'org-tempo t) ;; need this to not be asked which snippet i want to expand
+;; removes .tex files after they're rendered
 (add-to-list 'org-latex-logfiles-extensions "tex")
 
 (defun screenshot-svg ()
@@ -200,7 +196,6 @@ Saves to a temp file and puts the filename in the kill ring."
 
 
 ;; https://stackoverflow.com/questions/17435995/paste-an-image-on-clipboard-to-emacs-org-mode-file-without-saving-it
-
 (defun org-insert-clipboard-image (&optional file)
   "Asks for a file to paste the contents of the clipboard to, then links to it in the org file."
   (interactive "F")
@@ -215,11 +210,42 @@ Saves to a temp file and puts the filename in the kill ring."
 ;; get rid of those little things on the side
 ;; helps space out the buffer but idc :cold_face:
 (setq fringe-styles "no-fringes")
-
 ;; just looks kinda bad with certain themes
-;; (setq org-highlight-latex-and-related '(latex script entities))
-(setq auth-sources nil)
 
-;;(require 'tramp)
-;;(setq tramp-debug-buffer t)
-;;(setq tramp-verbose 10)
+;; (setq org-highlight-latex-and-related '(latex script entities))
+
+(define-key evil-normal-state-map (kbd "C-a") 'evil-numbers/inc-at-pt)
+;;(define-key evil-normal-state-map (kbd "C-c -") 'evil-numbers/dec-at-pt)
+
+
+;; tbh not sure if this is needed, but fuck it
+;; makes emacs use local emoji to render stuff
+;; *might* need emacs >28.1
+(set-fontset-font t 'emoji
+                  '("Twemoji" . "iso10646-1") nil 'prepend)
+
+(setq use-default-font-for-symbols nil)
+
+
+
+;; makes it so that you can page through the preview that pops when you write
+;; a command with <C-h>
+
+(after! which-key
+  (setq which-key-use-C-h-commands t
+        prefix-help-command #'which-key-C-h-dispatch)
+
+  (defadvice! fix-which-key-dispatcher-a (fn &rest args)
+    :around #'which-key-C-h-dispatch
+    (let ((keys (this-command-keys-vector)))
+      (if (equal (elt keys (1- (length keys))) ?\?)
+          (let ((keys (which-key--this-command-keys)))
+            (embark-bindings (seq-take keys (1- (length keys)))))
+        (apply fn args)))))
+
+
+
+(map!
+ :leader
+ :desc "Kaomoji"
+ "i k" #'insert-kaomoji)

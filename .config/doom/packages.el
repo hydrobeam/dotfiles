@@ -66,8 +66,9 @@
 ;;
 ;;(package! treemacs)
 (package! rmsbolt)
-
-
+(package! evil-numbers)
+(package! insert-kaomoji)
+;;
 ;; need to compile emacs with svg support :weary:
 ;;(package! pdf-continuous-scroll-mode :recipe
 ;;  (:host github

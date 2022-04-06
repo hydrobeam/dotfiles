@@ -3,6 +3,9 @@
 \usepackage{emoji} % it's in the name
 \usepackage[margin=1.2in]{geometry} % get the margins right.
 
+% to render unicode emoji straight up
+\newcommand{\moji}[1]{{\setmainfont{Twemoji}[Renderer=Harfbuzz]{#1}}}
+
 % for tracing characters that my font doesn't support. not sure how needed this is.
 
 \tracinglostchars=2
