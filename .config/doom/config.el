@@ -1,8 +1,7 @@
-;;; $DOOMDIR/config.el -*- lexical-binding: t; -*-
-
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
-;; Some functionality uses this to identify you, e.g. GPG configuration, email clients, file templates and snippets.
+;; Some functionality uses this to identify you, e.g. GPG configuration, email
+;; clients, file templates and snippets.
 (setq user-full-name "Laith Bahodi"
       user-mail-address "laithbahodi@gmail.com")
 
@@ -30,7 +29,8 @@
 (setq auto-save-default t)
 (setq make-backup-files t)
 
-;; save on window switch https://stackoverflow.com/questions/1413837/emacs-auto-save-on-switch-buffer
+;; save on window switch https://stackoverflow.com/questions/1413837/emacs-auto-
+;; save-on-switch-buffer
 (defadvice switch-to-buffer (before save-buffer-now activate)
   (when buffer-file-name (save-buffer)))
 (defadvice other-window (before other-window-now activate)
@@ -42,7 +42,7 @@
 ;;(setq confirm-kill-emacs nil)
 
 ;; cool theme
-(setq doom-theme 'doom-horizon)
+(setq doom-theme 'doom-old-hope)
 
 ;; full screen emacs on start
 ;; combined with initially make it start above other windows with kwin
@@ -83,14 +83,6 @@
   (require 'tree-sitter-langs)
   (global-tree-sitter-mode)
   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
-
-;; make rust lsp better (more like vscode)
-(use-package! lsp-rust
-  :config
-  (setq! lsp-rust-analyzer-server-display-inlay-hints t
-         lsp-rust-analyzer-inlay-hints-mode t
-         ))
-;;(setq lsp-idle-delay 0.100)
 
 (require 'org)
 (require 'ox-latex)
@@ -249,3 +241,32 @@ Saves to a temp file and puts the filename in the kill ring."
  :leader
  :desc "Kaomoji"
  "i k" #'insert-kaomoji)
+
+;; okay uhh, you gotta do someshit like
+;; untoggling lines-tail actual effect to make this work as intended
+(setq whitespace-style '(face tabs tab-mark spaces space-mark))
+
+(map!
+ :desc "Move up visual line"
+ :nv
+ "j" #'evil-next-visual-line)
+
+(map!
+ :desc "Move down visual line"
+ :nv
+ "k" #'evil-previous-visual-line)
+
+(map!
+ :desc "Move to end of visual line"
+ :nv
+ "$" #'evil-end-of-visual-line)
+
+(map!
+ :desc "Move to beginning of visual line"
+ :nv
+ "0" #'evil-beginning-of-visual-line)
+;;; config.el ends here
+
+
+(after! rustic
+  (setq lsp-rust-server 'rust-analyzer))

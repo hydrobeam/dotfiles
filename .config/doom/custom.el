@@ -20,7 +20,8 @@
      (org)
      (org)
      (evil-insert-state-exit-hook)
-     (evil-insert-state-exit-hook))))
+     (evil-insert-state-exit-hook)))
+ '(whitespace-style '(face trailing tabs spaces space-mark tab-mark)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

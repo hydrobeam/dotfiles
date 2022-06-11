@@ -50,28 +50,29 @@
                                         ;(unpin! t)
 
 
-(package! tree-sitter)
-(package! tree-sitter-langs)
+(package! tree-sitter)        ;; reasonable syntax highlighting
+(package! tree-sitter-langs)  ;; the languages
 
-;; toolkit to defaultly format all languages
-(package! format-all)
-;; center emacs org mode
-(package! visual-fill-column)
-;; make bullet points nicer in org mode
-(package! org-superstar)
+(package! format-all)         ;; toolkit to defaultly format all languages
+
+(package! visual-fill-column) ;; center org mode
+
+(package! org-superstar)      ;; make bullet points nicer in org mode
+
 
 ;; automatically toggle latex inline preview
 ;;(package! org-fragtog)
-;;
-;;
-;;(package! treemacs)
-(package! rmsbolt)
-(package! evil-numbers)
-(package! insert-kaomoji)
-;;
+
+(package! rmsbolt)            ;; see how a program is decoded
+(package! evil-numbers)       ;; lets <C-a> increase a number by 1
+(package! insert-kaomoji)     ;; emoji, but cute
+(package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
+(package! numpydoc)           ;; add numpy-style docs to python code
+
 ;; need to compile emacs with svg support :weary:
 ;;(package! pdf-continuous-scroll-mode :recipe
 ;;  (:host github
 ;;   :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
 
 
+(unpin! lsp-mode)
