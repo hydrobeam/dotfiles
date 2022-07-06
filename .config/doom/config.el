@@ -267,6 +267,22 @@ Saves to a temp file and puts the filename in the kill ring."
  "0" #'evil-beginning-of-visual-line)
 ;;; config.el ends here
 
+(setq lsp-rust-analyzer-server-display-inlay-hints t)
 
 (after! rustic
   (setq lsp-rust-server 'rust-analyzer))
+
+
+;; compile and run cpp file in active buffer
+(map! :leader
+      (:prefix ("e" . "execute")
+       :desc "C/C++"
+       "c" #'compileandrun))
+
+(defun compileandrun()
+  "Also run it comint mode"
+  (interactive)
+  (let* ((src (file-name-nondirectory (buffer-file-name)))
+         (exe (file-name-sans-extension src)))
+    (compile (concat "g++ " src  " -Wall " " -std=c++20 " " -o " exe ".out && ./" exe ".out" )
+             t)))

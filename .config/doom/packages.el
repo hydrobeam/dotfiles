@@ -49,14 +49,9 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
 
-
-(package! tree-sitter)        ;; reasonable syntax highlighting
-(package! tree-sitter-langs)  ;; the languages
-
 (package! format-all)         ;; toolkit to defaultly format all languages
 
 (package! visual-fill-column) ;; center org mode
-
 (package! org-superstar)      ;; make bullet points nicer in org mode
 
 
@@ -69,6 +64,7 @@
 (package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
 (package! numpydoc)           ;; add numpy-style docs to python code
 
+(package! org-special-block-extras) ;; custom org-blocks
 ;; need to compile emacs with svg support :weary:
 ;;(package! pdf-continuous-scroll-mode :recipe
 ;;  (:host github
