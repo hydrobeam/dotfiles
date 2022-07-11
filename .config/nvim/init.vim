@@ -24,7 +24,8 @@ set listchars+=space:.      " Add dots for whitespace like vscode
 
 filetype plugin indent on
 
-let mapleader=","
+nnoremap <SPACE> <Nop>
+let mapleader=" "
 
 set termguicolors
 let g:sonokai_style = 'andromeda'
@@ -47,7 +48,8 @@ nmap <silent> gd <Plug>(coc-definition)
 nmap <silent> gy <Plug>(coc-type-definition)
 nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
-nmap <leader>rn <Plug>(coc-rename)
+" doom inspired
+nmap <leader> cr <Plug>(coc-rename)
 let g:coc_disable_transparent_cursor = 1
 let g:coc_global_extensions = ['coc-json', 'coc-rust-analyzer', 'coc-pyright']
 
