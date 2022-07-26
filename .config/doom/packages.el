@@ -49,26 +49,23 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
                                         ;(unpin! t)
 
-(package! format-all)         ;; toolkit to defaultly format all languages
-
 (package! visual-fill-column) ;; center org mode
 (package! org-superstar)      ;; make bullet points nicer in org mode
-
 
 ;; automatically toggle latex inline preview
 ;;(package! org-fragtog)
 
+
+
+(package! s)                  ;; string operations, mainly just snake_case/camelCase
 (package! rmsbolt)            ;; see how a program is decoded
 (package! evil-numbers)       ;; lets <C-a> increase a number by 1
 (package! insert-kaomoji)     ;; emoji, but cute
 (package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
 (package! numpydoc)           ;; add numpy-style docs to python code
 
+;; good-ass screenshots
+(package! screenshot :recipe (:host github :repo "tecosaur/screenshot" :branch "master" :build (:not compile)))
 (package! org-special-block-extras) ;; custom org-blocks
-;; need to compile emacs with svg support :weary:
-;;(package! pdf-continuous-scroll-mode :recipe
-;;  (:host github
-;;   :repo "dalanicolai/pdf-continuous-scroll-mode.el"))
-
 
 (unpin! lsp-mode)
