@@ -6,10 +6,6 @@
 (setq user-full-name "Laith Bahodi"
       user-mail-address "laithbahodi@gmail.com")
 
-;; github integration and shit
-(setq auth-sources '("~/.authinfo"))
-
-
 (setq auto-save-default t)
 (setq make-backup-files t)
 
@@ -34,22 +30,36 @@
 
 (setq doom-font (font-spec :family "Jetbrains Mono" :size 13.5))
 
+;; tbh not sure if this is needed, but fuck it
+;; makes emacs use local emoji to render stuff
+;; *might* need emacs >28.1
+(set-fontset-font t 'emoji
+                  '("Twemoji" . "iso10646-1") nil 'prepend)
+
+;; enables emoji under emacs --daemon
+;; might be a bad solution
+(set-fontset-font t 'unicode "Twemoji")
+
 ;; 🥺 do you really want to kill emacs 😭 😿
 ;;(setq confirm-kill-emacs nil)
 
 (setq modus-themes-bold-constructs t)
-(setq modus-themes-mode-line '(borderless (padding . 0) (height . 0.0)))
+(setq modus-themes-mode-line '(accented borderless (padding . 0) (height . 0.0)))
 (setq modus-themes-hl-line '())
 (setq modus-themes-region '(bg-only))
 (setq modus-themes-org-blocks 'gray-background)
+
+(setq modus-themes-vivendi-color-overrides
+      '(
+        (bg-dim . "#000000")  ; default is #f8f8f8
+        (bg-alt . "#000000")  ; default is #f0f0f0
+        ))
 
 (setq doom-theme 'modus-vivendi)
 
 ;; full screen emacs on start (fullboth makes the daemon startup in full too)
 ;; combined with kwin to make it start above other windows with kwin
-(add-to-list 'default-frame-alist `(fullscreen . fullboth))
-(add-hook 'window-setup-hook 'toggle-frame-maximized t) ; may or may not be necessary, god knows
-
+(add-to-list 'default-frame-alist `(fullscreen . maximized))
 
 ;; adds time to modeline
 ;; not deferring because this is always on
@@ -63,6 +73,8 @@
   :config
   ;; allows you to C-w C-w to treemacs
   (setq treemacs-is-never-other-window nil)
+  ;; alters file icons to be more vscode-esque (better)
+  ;; https://github.com/doomemacs/themes/wiki/Extension:-Treemacs
   (setq doom-themes-treemacs-theme "doom-colors")
   )
 
@@ -76,6 +88,106 @@
   ;; by switching on and off
   (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
 
+(use-package! screenshot
+  :defer t
+  :config
+  (setq screenshot-shadow-radius 16)
+  )
+
+
+(defun znc-register ()
+  (interactive)
+  (setq znc-servers
+        `(
+          (,(+pass-get-secret "csc-znc-server") 6697 t
+           ((libera "lbahodi" ,(+pass-get-secret "csc-znc-password")
+                    ))))
+        )
+  )
+
+(use-package! notifications
+  :after erc
+  :config
+
+  (defun my/erc-send-notif (_proc parsed)
+    "Notifies of every incoming PRIVMSG (aka regular channel message)"
+
+    (let* (
+           (sender (car (erc-parse-user (erc-response.sender parsed))))
+           (msg (erc-response.contents parsed))
+           (channel (car (erc-response.command-args parsed)))
+           (cmd-args (erc-response.command-args parsed))
+           )
+
+      ;; c|m is just what the irc-bridge seems to send over from discord
+      (when (string= sender "c|m")
+        ;; msg format is: <user> rest of message
+        ;; so we extract user and remove it from rest of message
+        (setq msg-index (cl-search ">" msg))
+
+        (setq sender (format! "(discord) %s" (substring msg 1 msg-index)))
+        (setq msg (substring message-contents (+ msg-index 1)))
+        )
+
+      (notifications-notify
+       :body (xml-escape-string msg t)
+       :app-name "Emacs ERC"
+       :title (format! "%s in %s" sender channel)
+       :urgency 'normal)
+      )
+
+    ;; return nil to continue processing
+    nil
+    )
+  )
+
+(defun my/erc-enable-notifications ()
+  (interactive)
+  (add-hook 'erc-server-PRIVMSG-functions 'my/erc-send-notif)
+  )
+
+(defun my/erc-disable-notifications ()
+  (interactive)
+  (remove-hook 'erc-server-PRIVMSG-functions 'my/erc-send-notif)
+  )
+;; (add-hook 'erc-insert-modify-hook 'my/erc-match-message)
+;; (add-hook 'erc-insert-modify-hook 'erc-global-notify)
+
+
+(use-package! erc
+  :defer t
+  :config
+  (setq erc-server "irc.libera.chat"
+        erc-nick "aquabeam"
+        erc-user-full-name "Laith Bahodi"
+        erc-prompt-for-password 'nil
+        erc-password (+pass-get-secret "irc-aquabeam-libera-password")
+        )
+  (setq erc-match-exclude-server-buffer t)
+  (setq erc-track-visibility nil) ; Only use the selected frame for visibility
+  (setq erc-fill-column 100
+        erc-fill-function 'erc-fill-static
+        erc-fill-static-center 20)
+
+  (setq erc-keywords '("aqua" "kde" "emacs"))
+
+  (custom-set-faces!
+    '(erc-my-nick-face :foreground "azure2")
+    '(erc-prompt-face :foreground "thistle1"))
+  )
+
+
+(use-package! erc-hl-nicks
+  :after erc
+  :config
+  (add-to-list 'erc-modules 'hl-nicks)
+  )
+
+;; (use-package! erc-image
+;;   :after erc
+;;   :config
+;;   (setq erc-image-inline-rescale 300)
+;;   (add-to-list 'erc-modules 'image))
 
 ;; ORG MODE SETUP STARTS HERE
 
@@ -228,15 +340,9 @@
   (setq lsp-rust-server 'rust-analyzer)
   )
 
-;; tbh not sure if this is needed, but fuck it
-;; makes emacs use local emoji to render stuff
-;; *might* need emacs >28.1
-(set-fontset-font t 'emoji
-                  '("Twemoji" . "iso10646-1") nil 'prepend)
+(after! company
+  (add-to-list 'company-backends 'company-files))
 
-;; enables emoji under emacs --daemon
-;; might be a bad solution
-(set-fontset-font t 'unicode "Twemoji")
 
 ;; makes it so that you can page through the preview that pops when you write
 ;; a command with <C-h>
@@ -254,6 +360,7 @@
 
 (map!
  :desc "Increment a number by 1"
+ :n
  "C-a" #'evil-numbers/inc-at-pt)
 
 ;;(define-key evil-normal-state-map (kbd "C-c -") 'evil-numbers/dec-at-pt)
@@ -284,6 +391,11 @@
  :nv
  "0" #'evil-beginning-of-visual-line)
 
+(map!
+ :leader
+ (:prefix ("e" . "execute")
+  :desc "Switch to ERC Buffer"
+  "e" #'erc-switch-to-buffer))
 
 ;; compile and run cpp file in active buffer
 (map! :leader

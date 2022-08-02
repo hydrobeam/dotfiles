@@ -57,12 +57,17 @@
 
 
 
+(package! org-drill)
 (package! s)                  ;; string operations, mainly just snake_case/camelCase
 (package! rmsbolt)            ;; see how a program is decoded
 (package! evil-numbers)       ;; lets <C-a> increase a number by 1
 (package! insert-kaomoji)     ;; emoji, but cute
 (package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
 (package! numpydoc)           ;; add numpy-style docs to python code
+
+;; irc setup
+(package! znc)
+(package! erc-hl-nicks)
 
 ;; good-ass screenshots
 (package! screenshot :recipe (:host github :repo "tecosaur/screenshot" :branch "master" :build (:not compile)))
