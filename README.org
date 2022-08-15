@@ -1,7 +1,6 @@
 
 * Dotfiles
 
-
 ** Overview
 My configuration files for *Emacs*, *Vim*, *Alacritty* and *Fish* and *LaTeX*.
 
