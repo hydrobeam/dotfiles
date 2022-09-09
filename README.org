@@ -15,7 +15,13 @@ pip install pygments
 ** Setup/Installation
 
 *** Installing
-Use [[https:yadm.io][yadm]] to manage dotfiles.
+Use [[https://yadm.io][yadm]] to manage dotfiles.
+
+If on a remote server, to place ~yadm~ in =~/bin=:
+
+#+begin_src bash
+curl -fLo ~/bin/yadm https://github.com/TheLocehiliosan/yadm/raw/master/yadm && chmod +x ~/bin/yadm
+#+end_src
 
 After installing ~yadm~, setting up is as simple as:
 
