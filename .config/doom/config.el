@@ -3,12 +3,19 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
+
+(set-file-template! "\\.org$" :trigger "__org" :mode 'org-mode)
+
 (setq user-full-name "Laith Bahodi"
       user-mail-address "laithbahodi@gmail.com")
+
+(setq auth-sources '("~/.authinfo.gpg"))
 
 (setq auto-save-default t)
 (setq make-backup-files t)
 
+;; for spell-fu
+(setq ispell-dictionary "en_GB")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -28,27 +35,26 @@
 (defadvice other-frame (before other-frame-now activate)
   (when buffer-file-name (save-buffer)))
 
+;; nice font + big font size
 (setq doom-font (font-spec :family "Jetbrains Mono" :size 13.5))
 
-;; tbh not sure if this is needed, but fuck it
-;; makes emacs use local emoji to render stuff
-;; *might* need emacs >28.1
-(set-fontset-font t 'emoji
-                  '("Twemoji" . "iso10646-1") nil 'prepend)
+;; apple > twemoji 😳
+(if (member "AppleColorEmoji" (font-family-list))
+  (set-fontset-font
+    t 'symbol (font-spec :family "AppleColorEmoji") nil 'prepend)
+  (set-fontset-font
+    t 'symbol (font-spec :family "Twemoji") nil 'prepend)
+  )
 
-;; enables emoji under emacs --daemon
-;; might be a bad solution
-(set-fontset-font t 'unicode "Twemoji")
-
-;; 🥺 do you really want to kill emacs 😭 😿
-;;(setq confirm-kill-emacs nil)
-
+;; modus theme config
 (setq modus-themes-bold-constructs t)
+;; add colour to modeline
 (setq modus-themes-mode-line '(accented borderless (padding . 0) (height . 0.0)))
 (setq modus-themes-hl-line '())
 (setq modus-themes-region '(bg-only))
-(setq modus-themes-org-blocks 'gray-background)
+(setq modus-themes-org-blocks 'tinted-background)
 
+;; make every background pitch black
 (setq modus-themes-vivendi-color-overrides
       '(
         (bg-dim . "#000000")  ; default is #f8f8f8
@@ -57,13 +63,14 @@
 
 (setq doom-theme 'modus-vivendi)
 
+
 ;; full screen emacs on start (fullboth makes the daemon startup in full too)
 ;; combined with kwin to make it start above other windows with kwin
 (add-to-list 'default-frame-alist `(fullscreen . maximized))
 
 ;; adds time to modeline
-;; not deferring because this is always on
 (use-package! doom-modeline
+  :defer t
   :config
   (display-time-mode 1)
   )
@@ -78,20 +85,13 @@
   (setq doom-themes-treemacs-theme "doom-colors")
   )
 
-;; not sure why init.el doesn't do this
-;; REVIEW check if this is necessary
-(use-package tree-sitter
-  :config
-  ;; activate tree-sitter on any buffer containing code for which it has a parser available
-  (global-tree-sitter-mode)
-  ;; you can easily see the difference tree-sitter-hl-mode makes for python, ts or tsx
-  ;; by switching on and off
-  (add-hook 'tree-sitter-after-on-hook #'tree-sitter-hl-mode))
-
 (use-package! screenshot
   :defer t
   :config
-  (setq screenshot-shadow-radius 16)
+  (setq screenshot-shadow-radius 12)
+  (setq screenshot-line-numbers-p t)
+  (setq screenshot-relative-line-numbers-p t)
+  (setq screenshot-truncate-lines-p t)
   )
 
 
@@ -108,7 +108,6 @@
 (use-package! notifications
   :after erc
   :config
-
   (defun my/erc-send-notif (_proc parsed)
     "Notifies of every incoming PRIVMSG (aka regular channel message)"
 
@@ -133,7 +132,7 @@
        :body (xml-escape-string msg t)
        :app-name "Emacs ERC"
        :title (format! "%s in %s" sender channel)
-       :urgency 'normal)
+       :urgency normal)
       )
 
     ;; return nil to continue processing
@@ -169,7 +168,7 @@
         erc-fill-function 'erc-fill-static
         erc-fill-static-center 20)
 
-  (setq erc-keywords '("aqua" "kde" "emacs"))
+  (setq erc-keywords '("aqua" "awua" "beam" "kde" "emacs"))
 
   (custom-set-faces!
     '(erc-my-nick-face :foreground "azure2")
@@ -183,21 +182,104 @@
   (add-to-list 'erc-modules 'hl-nicks)
   )
 
-;; (use-package! erc-image
-;;   :after erc
-;;   :config
-;;   (setq erc-image-inline-rescale 300)
-;;   (add-to-list 'erc-modules 'image))
+(after! dap-mode
+  (setq dap-python-debugger 'debugpy))
+
+(use-package! markdown-mode
+  :defer t
+  :config
+  (setq markdown-fontify-code-blocks-natively t)
+  )
 
 ;; ORG MODE SETUP STARTS HERE
 
+;; this is from teco to make ox-chameleon work
+;; https://github.com/tecosaur/emacs-config/blob/master/config.org#class-templates
+( after! ox-latex
+  (let* ((article-sections '(("\\section{%s}" . "\\section*{%s}")
+                             ("\\subsection{%s}" . "\\subsection*{%s}")
+                             ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+                             ("\\paragraph{%s}" . "\\paragraph*{%s}")
+                             ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
+         (book-sections (append '(("\\chapter{%s}" . "\\chapter*{%s}"))
+                                article-sections))
+         (hanging-secnum-preamble "
+\\renewcommand\\sectionformat{\\llap{\\thesection\\autodot\\enskip}}
+\\renewcommand\\subsectionformat{\\llap{\\thesubsection\\autodot\\enskip}}
+\\renewcommand\\subsubsectionformat{\\llap{\\thesubsubsection\\autodot\\enskip}}
+")
+         (big-chap-preamble "
+\\RedeclareSectionCommand[afterindent=false, beforeskip=0pt, afterskip=0pt, innerskip=0pt]{chapter}
+\\setkomafont{chapter}{\\normalfont\\Huge}
+\\renewcommand*{\\chapterheadstartvskip}{\\vspace*{0\\baselineskip}}
+\\renewcommand*{\\chapterheadendvskip}{\\vspace*{0\\baselineskip}}
+\\renewcommand*{\\chapterformat}{%
+  \\fontsize{60}{30}\\selectfont\\rlap{\\hspace{6pt}\\thechapter}}
+\\renewcommand*\\chapterlinesformat[3]{%
+  \\parbox[b]{\\dimexpr\\textwidth-0.5em\\relax}{%
+    \\raggedleft{{\\large\\scshape\\bfseries\\chapapp}\\vspace{-0.5ex}\\par\\Huge#3}}%
+    \\hfill\\makebox[0pt][l]{#2}}
+"))
+    (setcdr (assoc "article" org-latex-classes)
+            `(,(concat "\\documentclass{scrartcl}" hanging-secnum-preamble)
+              ,@article-sections))
+    (add-to-list 'org-latex-classes
+                 `("report" ,(concat "\\documentclass{scrartcl}" hanging-secnum-preamble)
+                   ,@article-sections))
+    (add-to-list 'org-latex-classes
+                 `("book" ,(concat "\\documentclass[twoside=false]{scrbook}"
+                                   big-chap-preamble hanging-secnum-preamble)
+                   ,@book-sections))
+    (add-to-list 'org-latex-classes
+                 `("blank" "[NO-DEFAULT-PACKAGES]\n[NO-PACKAGES]\n[EXTRA]"
+                   ,@article-sections))
+    (add-to-list 'org-latex-classes
+                 `("bmc-article" "\\documentclass[article,code,maths]{bmc}\n[NO-DEFAULT-PACKAGES]\n[NO-PACKAGES]\n[EXTRA]"
+                   ,@article-sections))
+    (add-to-list 'org-latex-classes
+                 `("bmc" "\\documentclass[code,maths]{bmc}\n[NO-DEFAULT-PACKAGES]\n[NO-PACKAGES]\n[EXTRA]"
+                   ,@book-sections)))
+
+(setq org-latex-tables-booktabs t
+      org-latex-hyperref-template "
+\\providecolor{url}{HTML}{0077bb}
+\\providecolor{link}{HTML}{882255}
+\\providecolor{cite}{HTML}{999933}
+\\hypersetup{
+  pdfauthor={%a},
+  pdftitle={%t},
+  pdfkeywords={%k},
+  pdfsubject={%d},
+  pdfcreator={%c},
+  pdflang={%L},
+  breaklinks=true,
+  colorlinks=true,
+  linkcolor=link,
+  urlcolor=url,
+  citecolor=cite\n}
+\\urlstyle{same}
+%% hide links styles in toc
+"
+      org-latex-reference-command "\\cref{%s}")
+  )
+
+
+(use-package! org-pandoc-import :after org)
+
 ;; https://stackoverflow.com/questions/17435995/paste-an-image-on-clipboard-to-emacs-org-mode-file-without-saving-it
-(defun org-insert-clipboard-image (&optional file)
+(defun insert-clipboard-image (&optional file)
   "Asks for a file to paste the contents of the clipboard to, then links to it in the org file."
   (interactive "F")
   (shell-command (concat "xclip -selection clipboard -t image/jpg -o > " file ".jpg"))
-  (insert (concat "[[" file ".jpg]]"))
-  (org-display-inline-images))
+  (insert
+   (cond
+        ((derived-mode-p 'org-mode)(concat "[[" file ".jpg]]") )
+        ((derived-mode-p 'markdown-mode) (concat "[](" file ".jpg)"))
+        (t (user-error "Invalid/unsupported mode"))
+   )
+   )
+  (org-display-inline-images)
+  )
 
 
 (defun dw/org-mode-setup ()
@@ -209,8 +291,28 @@
   (setq evil-auto-indent nil))
 
 ;; after! loading because variables don't exist yet
-(after! 'org-mode
+(after! org
   ;; removes .tex files after they're rendered
+  (setq org-todo-keywords
+        '((sequence "TODO(t)" "IDEA(i)" "HOLD(h)" "|" "DONE(d)" "CANCELLED(c)" "FAILED(f)")
+          ;; (sequence "[ ](T)" "[-](S)" "|" "[X](D)")
+          ;; (sequence "|" "OKAY(o)" "YES(y)" "NO(n)")
+          ))
+
+
+  (setq org-todo-keyword-faces
+        (append org-todo-keywords
+                '(
+                  ("IDEA" . (:foreground "cyan" :weight "bold"))
+                  ("FAILED" . (:foreground "red" :weight "bold"))
+                  ("CANCELlED" . (:foreground "red" :weight "bold"))
+                  )
+                  )
+                )
+  )
+
+
+(after! org-latex
   (add-to-list 'org-latex-logfiles-extensions "tex")
   )
 
@@ -231,6 +333,7 @@
   )
 
 (use-package! org-agenda
+  :defer t
   :config
   ;; copied from prot
   ;; https://protesilaos.com/codelog/2021-12-09-emacs-org-block-agenda/
@@ -273,14 +376,33 @@
                         (org-agenda-entry-types '(:deadline :scheduled))
                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done)))))))))
 
+;; lets you do something like "SPC\ h" when searching
+(setq orderless-component-separator #'orderless-escapable-split-on-space)
 
-;; Nice bullets in org
-(use-package! org-superstar
-  :after org
+
+(use-package! ox-chameleon
+  :after ox-latex)
+(use-package! ox-chameleon
+  :after ox-html)
+(after! org-src
+(setq org-highlight-latex-and-related '(native script entities))
+(add-to-list 'org-src-block-faces '("latex" (:inherit default :extend t)))
+  )
+
+(after! tree-sitter-langs
+  (add-to-list 'tree-sitter-major-mode-language-alist '(agda2-mode . agda))
+)
+
+(use-package! org-modern
+  :hook (org-mode . org-modern-mode)
   :config
-  (setq org-superstar-special-todo-items t)
-  (add-hook 'org-mode-hook (lambda ()
-                             (org-superstar-mode 1))))
+  (setq org-modern-todo nil)
+  (setq org-modern-variable-pitch nil)
+  (setq org-modern-todo-faces nil)
+  (setq org-modern-checkbox nil)
+  (setq org-modern-table nil)
+  )
+
 
 (use-package! org
   :hook (org-mode . dw/org-mode-setup)
@@ -289,11 +411,12 @@
   (setq org-directory "~/org/")
   :config
 
+  (setq org-link-descriptive nil)
   (setq org-ellipsis " ▾")
 
   ;; latex config
 
-  ;;; lualatex preview
+  ;; lualatex preview
   (setq org-latex-pdf-process
         '("lualatex -shell-escape -interaction nonstopmode %f"
           "lualatex -shell-escape -interaction nonstopmode %f"))
@@ -311,25 +434,28 @@
 
   (add-to-list 'org-preview-latex-process-alist luamagick)
   (setq org-preview-latex-default-process 'luamagick) ;; lowkey no idea
-  ;;; would set bgcolor here but idk how
 
-  ;;; use minted for code rendering in org block export
   (setq org-src-fontify-natively t)
-  (setq org-latex-src-block-backend 'minted)
-  (add-to-list 'org-latex-packages-alist '("" "minted"))
-
-  (setq org-latex-minted-options
-        '(("linenos=true") ("breaklines" "true") ("breakanywhere" "true") ("numbersep=5pt")
-          ))
+  (setq org-latex-src-block-backend 'engraved)
 
   ;; makes latex preview bigger
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
   )
 
+(use-package! engrave-faces-latex
+  :after ox-latex
+  :config
+  (add-to-list 'org-latex-engraved-options '("linenos" "true"))
+  ;; (setq org-latex-engraved-theme "t") REVIEW: doesn't work atm
+  )
+
+(use-package! magit-delta
+  :hook (magit-mode . magit-delta-mode))
 ;; ORG MODE CONFIG ENDS HERE
 
 ;; copied from https://github.com/ianyepan/yay-evil-emacs/
 (use-package! mwheel
+  :defer t
   :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
                 mouse-wheel-progressive-speed nil))
 
@@ -340,8 +466,8 @@
   (setq lsp-rust-server 'rust-analyzer)
   )
 
-(after! company
-  (add-to-list 'company-backends 'company-files))
+(set-company-backend! 'prog-mode 'company-capf 'company-emoji  'company-files)
+(set-company-backend! 'text-mode 'company-capf 'company-files 'company-emoji)
 
 
 ;; makes it so that you can page through the preview that pops when you write
@@ -357,6 +483,8 @@
           (let ((keys (which-key--this-command-keys)))
             (embark-bindings (seq-take keys (1- (length keys)))))
         (apply fn args)))))
+
+
 
 (map!
  :desc "Increment a number by 1"
@@ -392,10 +520,16 @@
  "0" #'evil-beginning-of-visual-line)
 
 (map!
+ :desc "Move to end of visual line"
+ :nv
+ "$" #'evil-end-of-visual-line)
+
+(map!
  :leader
  (:prefix ("e" . "execute")
   :desc "Switch to ERC Buffer"
   "e" #'erc-switch-to-buffer))
+
 
 ;; compile and run cpp file in active buffer
 (map! :leader
@@ -449,3 +583,36 @@
     (message "No region selected")))
 
 ;;; config.el ends here
+
+(setq lsp-eslint-server-command '("node" "/usr/bin/vscode-eslint-language-server" "--stdio"))
+
+
+
+;; https://tecosaur.github.io/emacs-config/config.html#smerge
+(defun smerge-repeatedly ()
+  "Perform smerge actions again and again"
+  (interactive)
+  (smerge-mode 1)
+  (smerge-transient))
+(after! transient
+  (transient-define-prefix smerge-transient ()
+    [["Move"
+      ("n" "next" (lambda () (interactive) (ignore-errors (smerge-next)) (smerge-repeatedly)))
+      ("p" "previous" (lambda () (interactive) (ignore-errors (smerge-prev)) (smerge-repeatedly)))]
+     ["Keep"
+      ("b" "base" (lambda () (interactive) (ignore-errors (smerge-keep-base)) (smerge-repeatedly)))
+      ("u" "upper" (lambda () (interactive) (ignore-errors (smerge-keep-upper)) (smerge-repeatedly)))
+      ("l" "lower" (lambda () (interactive) (ignore-errors (smerge-keep-lower)) (smerge-repeatedly)))
+      ("a" "all" (lambda () (interactive) (ignore-errors (smerge-keep-all)) (smerge-repeatedly)))
+      ("RET" "current" (lambda () (interactive) (ignore-errors (smerge-keep-current)) (smerge-repeatedly)))]
+     ["Diff"
+      ("<" "upper/base" (lambda () (interactive) (ignore-errors (smerge-diff-base-upper)) (smerge-repeatedly)))
+      ("=" "upper/lower" (lambda () (interactive) (ignore-errors (smerge-diff-upper-lower)) (smerge-repeatedly)))
+      (">" "base/lower" (lambda () (interactive) (ignore-errors (smerge-diff-base-lower)) (smerge-repeatedly)))
+      ("R" "refine" (lambda () (interactive) (ignore-errors (smerge-refine)) (smerge-repeatedly)))
+      ("E" "ediff" (lambda () (interactive) (ignore-errors (smerge-ediff)) (smerge-repeatedly)))]
+     ["Other"
+      ("c" "combine" (lambda () (interactive) (ignore-errors (smerge-combine-with-next)) (smerge-repeatedly)))
+      ("r" "resolve" (lambda () (interactive) (ignore-errors (smerge-resolve)) (smerge-repeatedly)))
+      ("k" "kill current" (lambda () (interactive) (ignore-errors (smerge-kill-current)) (smerge-repeatedly)))
+      ("q" "quit" (lambda () (interactive) (smerge-auto-leave)))]]))

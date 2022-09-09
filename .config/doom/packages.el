@@ -50,18 +50,10 @@
                                         ;(unpin! t)
 
 (package! visual-fill-column) ;; center org mode
-(package! org-superstar)      ;; make bullet points nicer in org mode
-
-;; automatically toggle latex inline preview
-;;(package! org-fragtog)
-
-
-
-(package! org-drill)
-(package! s)                  ;; string operations, mainly just snake_case/camelCase
+(package! s)                  ;; string operations, mainly just for snake_case/camelCase
 (package! rmsbolt)            ;; see how a program is decoded
 (package! evil-numbers)       ;; lets <C-a> increase a number by 1
-(package! insert-kaomoji)     ;; emoji, but cute
+(package! insert-kaomoji)     ;; emoji, but cute (◕‿◕)♡
 (package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
 (package! numpydoc)           ;; add numpy-style docs to python code
 
@@ -71,6 +63,32 @@
 
 ;; good-ass screenshots
 (package! screenshot :recipe (:host github :repo "tecosaur/screenshot" :branch "master" :build (:not compile)))
-(package! org-special-block-extras) ;; custom org-blocks
 
+;; org
+(package! org-drill)                ;; anki, but org
+(package! org-special-block-extras) ;; custom org-blocks
+(package! org-pandoc-import         ;; why ever leave org mode?
+  :recipe (:host github
+           :repo "tecosaur/org-pandoc-import"
+           :files ("*.el" "filters" "preprocessors")))
+(package! orgdiff :recipe (:host github :repo "tecosaur/orgdiff"))
+(package! engrave-faces :recipe (:host github :repo "tecosaur/engrave-faces")) ;; pretty code block output without minted
+(package! ox-chameleon :recipe (:host github :repo "tecosaur/ox-chameleon"))  ;; make latex output look like your buffer
+(package! org-modern) ;;  faster org-prettification
+(package! org-transclusion)
+;; end-org
+
+(package! company-emoji) ;; company backend to make typing emojis more convenient => :flu
+(package! tmr) ;; setting timers using a convenient notatio
+
+
+(package! theme-magic) ;; make our emacs theme apply to the terminal
+
+(package! magit-delta) ;; better diffs for magit
+
+;; themes
+(package! ef-themes :recipe (:host github :repo "protesilaos/ef-themes" :branch "main")) ;; really pretty themes
+
+;; why not
 (unpin! lsp-mode)
+(package! evil-escape :disable t) ;; don't use this:  jk to get out of evil mode
