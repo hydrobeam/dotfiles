@@ -19,8 +19,6 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     Plug 'vim-airline/vim-airline-themes'
     " Coc autocompletion and more
     Plug 'neoclide/coc.nvim', {'branch': 'release'}    
-    " Coq interpreter
-    Plug 'whonore/Coqtail'
     " Monokai pro theme
     Plug 'phanviet/vim-monokai-pro'
     " Monokai pro alternative theme
@@ -41,10 +39,14 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     " fzf vim integration
     Plug 'junegunn/fzf.vim'
     " Rust
-    " Plug 'rust-lang/rust.vim'
+    Plug 'rust-lang/rust.vim'
     " dwim commenting wth gc
     Plug 'tomtom/tcomment_vim'
     " Better highlighting for C and family
     Plug 'jackguo380/vim-lsp-cxx-highlight'
+    " make s be f but two letters
+    Plug 'justinmk/vim-sneak'
+    " surround things with things very easily
+    Plug 'tpope/vim-surround'
 call plug#end()
 

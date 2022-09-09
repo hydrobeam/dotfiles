@@ -32,12 +32,6 @@ let g:sonokai_style = 'andromeda'
 let g:sonokai_enable_italic = 0
 let g:sonokai_disable_italic_comment = 0
 colorscheme sonokai 
-" hi Normal guibg=NONE ctermbg=NONE
-
-" let g:edge_style = 'neon'
-" let g:edge_disable_italic_comment=1
-" let g:edge_better_performance = 1
-" colorscheme edge
 
 set nobackup
 set nowritebackup
@@ -58,12 +52,12 @@ let g:LanguageClient_serverCommands = {
     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],
     \ }
 
+" stolen from :h coc-completion
 function! CheckBackSpace() abort
   let col = col('.') - 1
   return !col || getline('.')[col - 1]  =~ '\s'
 endfunction
 
-" stolen from :h coc-completion
 " Insert <tab> when previous text is space, refresh completion if not.
 inoremap <silent><expr> <TAB>
   \ coc#pum#visible() ? coc#pum#next(1):
