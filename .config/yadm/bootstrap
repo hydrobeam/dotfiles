@@ -1,0 +1,80 @@
+#!/bin/bash
+
+
+read -p "Install Neovim locally from github (y/n)?" choice
+
+if test -f $HOME/.bash_profile;
+then
+  dotfile=$HOME/.bash_profile
+else
+  dotfile=$HOME/.profile
+fi
+
+case "$choice" in
+  y|Y )
+    cd "$HOME"
+    wget -q https://github.com/neovim/neovim/releases/download/v0.7.2/nvim-linux64.tar.gz
+    echo "Pulled compressed Neovim binary from github"
+    tar -xf nvim-linux64.tar.gz
+    echo "Extracted binary"
+    # do this in case of manually making the prompt fish at the end of the dotfile
+    if [$(tail -n1 $dotfile) == "fish"]; then
+      echo "Prepending ~/nvim-linux64/bin to PATH"
+    # https://superuser.com/questions/246837/how-do-i-add-text-to-the-beginning-of-a-file-in-bash
+      sed -i '1iPATH=~/nvim-linux64/bin/:$PATH' $dotfile
+    else
+      echo "Appending ~/nvim-linux64/bin to PATH"
+      echo 'PATH=~/nvim-linux64/bin/:$PATH' >> $dotfile
+    fi
+    echo "Removing unneeded .tar.gz"
+    rm ~/nvim-linux64.tar.gz
+  ;;
+  n|N ) echo "no";;
+  * ) echo "invalid";;
+esac
+
+read -p "install a recent version of node with nvm-sh (for lsp) (y/n)?" choice
+case "$choice" in
+  y|y )
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+    echo "Finished installing nvm-sh"
+    export NVM_DIR="$HOME/.nvm"
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+    nvm install node
+    ;;
+  n|n )
+
+    # alternate install method
+    read -p "How about nvm-fish? (y/n)" choice
+    case "$choice" in
+    y|Y )
+
+        if command -v "fisher";
+        then
+            fisher install jorgebucaran/nvm.fish
+        else
+            # install fisher first
+            echo "Fisher not detected, installing fisher first"
+            fish -c "curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher"
+            fish -c "fisher install jorgebucaran/nvm.fish"
+        fi
+        echo "Finished installing nvm-fish"
+        fish -c "nvm install latest"
+        echo "nvm use latest" >> $HOME/.config/fish/config.fish
+        ;;
+
+  n|N ) echo "no";;
+  * ) echo "invalid";;
+esac
+;;
+  * ) echo "invalid";;
+esac
+
+
+read -p "Install neovim plugins? (y/n)?" choice
+case "$choice" in
+  y|Y )
+  nvim '+PlugInstall';;
+  n|N ) echo "no";;
+  * ) echo "invalid";;
+esac
