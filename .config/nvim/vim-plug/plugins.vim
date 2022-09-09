@@ -41,8 +41,10 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     " fzf vim integration
     Plug 'junegunn/fzf.vim'
     " Rust
-    Plug 'rust-lang/rust.vim'
-    Plug 'atelierbram/Base2Tone-vim'
-
+    " Plug 'rust-lang/rust.vim'
+    " dwim commenting wth gc
+    Plug 'tomtom/tcomment_vim'
+    " Better highlighting for C and family
+    Plug 'jackguo380/vim-lsp-cxx-highlight'
 call plug#end()
 

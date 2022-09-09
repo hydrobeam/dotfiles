@@ -50,6 +50,7 @@ nmap <silent> gi <Plug>(coc-implementation)
 nmap <silent> gr <Plug>(coc-references)
 " doom inspired
 nmap <leader> cr <Plug>(coc-rename)
+
 let g:coc_disable_transparent_cursor = 1
 let g:coc_global_extensions = ['coc-json', 'coc-rust-analyzer', 'coc-pyright']
 
@@ -57,12 +58,30 @@ let g:LanguageClient_serverCommands = {
     \ 'rust': ['rustup', 'run', 'nightly', 'rls'],
     \ }
 
+function! CheckBackSpace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~ '\s'
+endfunction
+
+" stolen from :h coc-completion
+" Insert <tab> when previous text is space, refresh completion if not.
 inoremap <silent><expr> <TAB>
-      \ pumvisible() ? "\<C-n>" : "<TAB>"
+  \ coc#pum#visible() ? coc#pum#next(1):
+  \ CheckBackSpace() ? "\<Tab>" :
+  \ coc#refresh()
+inoremap <expr><S-TAB> coc#pum#visible() ? coc#pum#prev(1) : "\<C-h>"
+"""
+
+" Use <CR> (enter) to confirm completion, use: >
+inoremap <expr> <cr> coc#pum#visible() ? coc#_select_confirm() : "\<CR>"
+"
+
 
 inoremap <C-l> <Esc>:call unicoder#start(1)<CR>
 
 tnoremap <Esc> <C-\><C-n>
+" rusty
+let g:rustfmt_autosave = 1
 
 " Markdown
 let g:vim_markdown_fenced_languages = ['rust=rs']
