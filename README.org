@@ -2,15 +2,10 @@
 * Dotfiles
 
 ** Overview
-My configuration files for *Emacs*, *Vim*, *Alacritty* and *Fish* and *LaTeX*.
+My configuration files for *Emacs*, *Vim*, *Alacritty* and *Fish* and *LaTeX* & more.
 
-The *texmf* directory holds the templates that I commonly use for *LaTeX* files. Keep in mind that I use =minted=, which requires compilation with the =-shell-escape= flag, and the Python =pygments= package.
-
-
-#+BEGIN_SRC bash
-pip install pygments
-#+END_SRC
-
+The *texmf* directory holds the templates that I commonly use for *LaTeX* files. I rely on [[https://github.com/tecosaur/engrave-faces][engrave-faces]] to syntax-highlight code blocks.
+This is unique to Emacs & Org mode.
 
 ** Setup/Installation
 
