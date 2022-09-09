@@ -1,10 +1,27 @@
 \usepackage{xcolor} % define color
 \usepackage{hyperref} % links
 \usepackage{emoji} % it's in the name
+\usepackage{fontspec}
 \usepackage[margin=1.2in]{geometry} % get the margins right.
 
-% to render unicode emoji straight up
-\newcommand{\moji}[1]{{\setmainfont{Twemoji}[Renderer=Harfbuzz]{#1}}}
+
+% render uncode emoji straight up
+% https://tex.stackexchange.com/questions/572212/substituting-fonts-for-emojis-in-lualatex/572220#572220
+\directlua{luaotfload.add_fallback
+   ("emojifallback",
+    {
+      "AppleColorEmoji:mode=harf;"
+    }
+   )}
+
+\setmainfont{texgyretermes-regular}[
+  Extension      = .otf ,
+  BoldFont       = texgyretermes-bold,
+  ItalicFont     = texgyretermes-italic,
+  BoldItalicFont = texgyretermes-bolditalic,
+  RawFeature={fallback=emojifallback}
+]
+
 
 % for tracing characters that my font doesn't support. not sure how needed this is.
 
@@ -15,13 +32,10 @@
 \hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan}
 
 % code setup
-\usemintedstyle{manni}
-\definecolor{my-bg}{rgb}{0.96,0.96,0.96}
-\setminted{bgcolor=my-bg}
-\setmonofont[Ligatures=TeX]{inconsolata}
+\setmonofont[Ligatures=TeX]{Inconsolata}
 
 % emoji setup
-\setemojifont{twemoji}
+\setemojifont{AppleColorEmoji}
 
 
 \newcommand{\ligne}{\noindent\rule{\textwidth}{0.4pt}} % make a horizontal line
