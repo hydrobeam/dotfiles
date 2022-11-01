@@ -14,6 +14,7 @@
 (setq auto-save-default t)
 (setq make-backup-files t)
 
+(visual-line-mode)
 ;; for spell-fu
 (setq ispell-dictionary "en_GB")
 
@@ -38,21 +39,18 @@
 ;; nice font + big font size
 (setq doom-font (font-spec :family "Jetbrains Mono" :size 13.5))
 
-;; apple > twemoji 😳
-(if (member "AppleColorEmoji" (font-family-list))
-  (set-fontset-font
-    t 'symbol (font-spec :family "AppleColorEmoji") nil 'prepend)
-  (set-fontset-font
-    t 'symbol (font-spec :family "Twemoji") nil 'prepend)
-  )
-
 ;; modus theme config
 (setq modus-themes-bold-constructs t)
 ;; add colour to modeline
-(setq modus-themes-mode-line '(accented borderless (padding . 0) (height . 0.0)))
+(setq modus-themes-mode-line '(accented borderless))
 (setq modus-themes-hl-line '())
+(setq modus-themes-syntax '(green-strings))
 (setq modus-themes-region '(bg-only))
 (setq modus-themes-org-blocks 'tinted-background)
+(setq modus-themes-fringes '())
+(setq modus-themes-markup '(italic bold intense background))
+(setq modus-themes-paren-match '(underline))
+
 
 ;; make every background pitch black
 (setq modus-themes-vivendi-color-overrides
@@ -66,13 +64,28 @@
 
 ;; full screen emacs on start (fullboth makes the daemon startup in full too)
 ;; combined with kwin to make it start above other windows with kwin
+;;
+;; these both do the job but this one works on daemon and is also less shitty overall imo
+;; toggle-frame-fullscreen sometimes gets freaky
+;; caused issues with screenshot.el maybe?
 (add-to-list 'default-frame-alist `(fullscreen . maximized))
+;; (toggle-frame-fullscreen)
 
-;; adds time to modeline
 (use-package! doom-modeline
   :defer t
   :config
   (display-time-mode 1)
+  (setq doom-modeline-time-icon t)
+  (setq doom-modeline-height 62)
+  )
+
+(use-package! vterm
+  :defer t
+  :config
+  (map! :leader
+        (:prefix ("o" . "open")
+         :desc "Vterm here, but actually here as in where we are atm"
+         "T" #'vterm))
   )
 
 (use-package! treemacs
@@ -191,11 +204,32 @@
   (setq markdown-fontify-code-blocks-natively t)
   )
 
+(use-package! pdf-view
+  :hook (pdf-view-mode . hide-mode-line-mode))
+
 ;; ORG MODE SETUP STARTS HERE
+
+(use-package! laas
+  :hook ((LaTeX-mode org-mode) . laas-mode)
+  :config
+  ;; (setq laas-use-unicode t) ;; unicode >>
+  (aas-set-snippets 'org-mode
+    ";1" "⊢"
+    ";2" "⊥"
+    )
+
+  )
+
 
 ;; this is from teco to make ox-chameleon work
 ;; https://github.com/tecosaur/emacs-config/blob/master/config.org#class-templates
-( after! ox-latex
+(after! ox-latex
+
+  ;; deletes generated .tex files
+  (add-to-list 'org-latex-logfiles-extensions "tex")
+
+
+  ;; stolen from tecosaur to make ox-chameleon work
   (let* ((article-sections '(("\\section{%s}" . "\\section*{%s}")
                              ("\\subsection{%s}" . "\\subsection*{%s}")
                              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -240,8 +274,8 @@
                  `("bmc" "\\documentclass[code,maths]{bmc}\n[NO-DEFAULT-PACKAGES]\n[NO-PACKAGES]\n[EXTRA]"
                    ,@book-sections)))
 
-(setq org-latex-tables-booktabs t
-      org-latex-hyperref-template "
+  (setq org-latex-tables-booktabs t
+        org-latex-hyperref-template "
 \\providecolor{url}{HTML}{0077bb}
 \\providecolor{link}{HTML}{882255}
 \\providecolor{cite}{HTML}{999933}
@@ -260,7 +294,7 @@
 \\urlstyle{same}
 %% hide links styles in toc
 "
-      org-latex-reference-command "\\cref{%s}")
+        org-latex-reference-command "\\cref{%s}")
   )
 
 
@@ -268,15 +302,15 @@
 
 ;; https://stackoverflow.com/questions/17435995/paste-an-image-on-clipboard-to-emacs-org-mode-file-without-saving-it
 (defun insert-clipboard-image (&optional file)
-  "Asks for a file to paste the contents of the clipboard to, then links to it in the org file."
+  "Asks for a file to paste & link the contents of the clipboard"
   (interactive "F")
   (shell-command (concat "xclip -selection clipboard -t image/jpg -o > " file ".jpg"))
   (insert
    (cond
-        ((derived-mode-p 'org-mode)(concat "[[" file ".jpg]]") )
-        ((derived-mode-p 'markdown-mode) (concat "[](" file ".jpg)"))
-        (t (user-error "Invalid/unsupported mode"))
-   )
+    ((derived-mode-p 'org-mode)(concat "[[" file ".jpg]]") )
+    ((derived-mode-p 'markdown-mode) (concat "[](" file ".jpg)"))
+    (t (user-error "Invalid/unsupported mode"))
+    )
    )
   (org-display-inline-images)
   )
@@ -286,13 +320,11 @@
   (setq visual-fill-column-center-text t)
   (setq visual-fill-column-width 110)
   (visual-fill-column-mode 1)
-  (org-indent-mode)
-  (visual-line-mode)
-  (setq evil-auto-indent nil))
+  ;; (org-indent-mode)
+  ;; (setq evil-auto-indent nil))
+  )
 
-;; after! loading because variables don't exist yet
 (after! org
-  ;; removes .tex files after they're rendered
   (setq org-todo-keywords
         '((sequence "TODO(t)" "IDEA(i)" "HOLD(h)" "|" "DONE(d)" "CANCELLED(c)" "FAILED(f)")
           ;; (sequence "[ ](T)" "[-](S)" "|" "[X](D)")
@@ -305,16 +337,8 @@
                 '(
                   ("IDEA" . (:foreground "cyan" :weight "bold"))
                   ("FAILED" . (:foreground "red" :weight "bold"))
-                  ("CANCELlED" . (:foreground "red" :weight "bold"))
-                  )
-                  )
-                )
-  )
+                  ("CANCELlED" . (:foreground "red" :weight "bold"))))))
 
-
-(after! org-latex
-  (add-to-list 'org-latex-logfiles-extensions "tex")
-  )
 
 (use-package! org-pomodoro
   :defer t
@@ -377,21 +401,20 @@
                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done)))))))))
 
 ;; lets you do something like "SPC\ h" when searching
-(setq orderless-component-separator #'orderless-escapable-split-on-space)
 
-
+(use-package! orderless
+  :defer t
+  :config
+  (setq orderless-component-separator #'orderless-escapable-split-on-space)
+  )
 (use-package! ox-chameleon
   :after ox-latex)
-(use-package! ox-chameleon
-  :after ox-html)
-(after! org-src
-(setq org-highlight-latex-and-related '(native script entities))
-(add-to-list 'org-src-block-faces '("latex" (:inherit default :extend t)))
-  )
 
-(after! tree-sitter-langs
-  (add-to-list 'tree-sitter-major-mode-language-alist '(agda2-mode . agda))
-)
+(after! org-src
+  (setq org-highlight-latex-and-related '(native script entities))
+  (add-to-list 'org-src-block-faces '("latex" (:inherit default :extend t)))
+  (add-to-list 'org-src-block-faces '("rust" modus-themes-nuanced-yellow))
+  )
 
 (use-package! org-modern
   :hook (org-mode . org-modern-mode)
@@ -406,31 +429,31 @@
 
 (use-package! org
   :hook (org-mode . dw/org-mode-setup)
+  :defer t
   :init
   ;; must be initialized early
   (setq org-directory "~/org/")
   :config
-
-  (setq org-link-descriptive nil)
   (setq org-ellipsis " ▾")
 
   ;; latex config
-
   ;; lualatex preview
+
   (setq org-latex-pdf-process
         '("lualatex -shell-escape -interaction nonstopmode %f"
-          "lualatex -shell-escape -interaction nonstopmode %f"))
+          "lualatex -shell-escape -interaction nonstopmode %f"
+          ))
 
   ;;; stolen from somewhere🤷
   (setq luamagick '(luamagick :programs ("lualatex" "convert")
-                              :description "pdf > png"
-                              :message "you need to install lualatex and imagemagick."
-                              :use-xcolor t
-                              :image-input-type "pdf"
-                              :image-output-type "png"
-                              :image-size-adjust (1.0 . 1.0)
-                              :latex-compiler ("lualatex -interaction nonstopmode -output-directory %o %f")
-                              :image-converter ("convert -density %D -trim -antialias %f -quality 100 %O")))
+                    :description "pdf > png"
+                    :message "you need to install lualatex and imagemagick."
+                    :use-xcolor t
+                    :image-input-type "pdf"
+                    :image-output-type "png"
+                    :image-size-adjust (1.0 . 1.0)
+                    :latex-compiler ("lualatex -interaction nonstopmode -output-directory %o %f")
+                    :image-converter ("convert -density %D -trim -antialias %f -quality 100 %O")))
 
   (add-to-list 'org-preview-latex-process-alist luamagick)
   (setq org-preview-latex-default-process 'luamagick) ;; lowkey no idea
@@ -466,9 +489,24 @@
   (setq lsp-rust-server 'rust-analyzer)
   )
 
+;; (setq lsp-eslint-server-command '("node" "/usr/bin/vscode-eslint-language-server" "--stdio"))
+; (setq lsp-eslint-server-command '("node" "/usr/bin/deno" "--stdio"))
+
+;; (after! eglot
+;; (add-to-list 'eglot-server-programs '((js-mode typescript-mode) . (eglot-deno "deno" "lsp")))
+
+;;   (defclass eglot-deno (eglot-lsp-server) ()
+;;     :documentation "A custom class for deno lsp.")
+
+;;   (cl-defmethod eglot-initialization-options ((server eglot-deno))
+;;     "Passes through required deno initialization options"
+;;     (list :enable t
+;;     :lint t))
+;;   )
+
 (set-company-backend! 'prog-mode 'company-capf 'company-emoji  'company-files)
 (set-company-backend! 'text-mode 'company-capf 'company-files 'company-emoji)
-
+(delete 'company-yasnippet +lsp-company-backends)
 
 ;; makes it so that you can page through the preview that pops when you write
 ;; a command with <C-h>
@@ -484,45 +522,48 @@
             (embark-bindings (seq-take keys (1- (length keys)))))
         (apply fn args)))))
 
-
-
-(map!
- :desc "Increment a number by 1"
- :n
- "C-a" #'evil-numbers/inc-at-pt)
-
 ;;(define-key evil-normal-state-map (kbd "C-c -") 'evil-numbers/dec-at-pt)
 
+
+;; gamer setup
+;; (eval '(progn
+;; (run-with-timer
+;;  0 1.0
+;;  (let ((color '#0=("violet" "indigo" "blue" "green"
+;;                    "yellow" "orange" "red" . #0#)))
+;;    (lambda ()
+;;      (face-spec-set 'mode-line `((t :background ,(pop color)))))))) t)
 
 (map!
  :leader
  :desc "Kaomoji"
  "i k" #'insert-kaomoji)
+(visual-line-mode)
 
-(map!
- :desc "Move up visual line"
- :nv
- "j" #'evil-next-visual-line)
+;; (map!
+;;  :desc "Move up visual line"
+;;  :nv
+;;  "j" #'evil-next-visual-line)
 
-(map!
- :desc "Move down visual line"
- :nv
- "k" #'evil-previous-visual-line)
+;; (map!
+;;  :desc "Move down visual line"
+;;  :nv
+;;  "k" #'evil-previous-visual-line)
 
-(map!
- :desc "Move to end of visual line"
- :nv
- "$" #'evil-end-of-visual-line)
+;; (map!
+;;  :desc "Move to end of visual line"
+;;  :nv
+;;  "$" #'evil-end-of-visual-line)
 
-(map!
- :desc "Move to beginning of visual line"
- :nv
- "0" #'evil-beginning-of-visual-line)
+;; (map!
+;;  :desc "Move to beginning of visual line"
+;;  :nv
+;;  "0" #'evil-beginning-of-visual-line)
 
-(map!
- :desc "Move to end of visual line"
- :nv
- "$" #'evil-end-of-visual-line)
+;; (map!
+;;  :desc "Move to end of visual line"
+;;  :nv
+;;  "$" #'evil-end-of-visual-line)
 
 (map!
  :leader
@@ -542,7 +583,7 @@
   (interactive)
   (let* ((src (file-name-nondirectory (buffer-file-name)))
          (exe (file-name-sans-extension src)))
-    (compile (concat "g++ " src  " -Wall " " -std=c++20 " " -o " exe ".out && ./" exe ".out" )
+    (compile (concat "g++ " src  " -Wall -g " " -std=c++14 " " -o " exe ".out && ./" exe ".out" )
              t)))
 
 ;; these don't work very well since they eliminate non-text characters
@@ -584,8 +625,6 @@
 
 ;;; config.el ends here
 
-(setq lsp-eslint-server-command '("node" "/usr/bin/vscode-eslint-language-server" "--stdio"))
-
 
 
 ;; https://tecosaur.github.io/emacs-config/config.html#smerge
@@ -594,6 +633,7 @@
   (interactive)
   (smerge-mode 1)
   (smerge-transient))
+
 (after! transient
   (transient-define-prefix smerge-transient ()
     [["Move"
@@ -616,3 +656,12 @@
       ("r" "resolve" (lambda () (interactive) (ignore-errors (smerge-resolve)) (smerge-repeatedly)))
       ("k" "kill current" (lambda () (interactive) (ignore-errors (smerge-kill-current)) (smerge-repeatedly)))
       ("q" "quit" (lambda () (interactive) (smerge-auto-leave)))]]))
+
+
+(after! smartparens
+  (sp-local-pair '(c++-mode objc-mode)
+                 "<" ">"
+                 :actions :rem)
+  (sp-local-pair '(org-mode)
+                 "$" "$")
+  )

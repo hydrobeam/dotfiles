@@ -52,7 +52,6 @@
 (package! visual-fill-column) ;; center org mode
 (package! s)                  ;; string operations, mainly just for snake_case/camelCase
 (package! rmsbolt)            ;; see how a program is decoded
-(package! evil-numbers)       ;; lets <C-a> increase a number by 1
 (package! insert-kaomoji)     ;; emoji, but cute (◕‿◕)♡
 (package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
 (package! numpydoc)           ;; add numpy-style docs to python code
@@ -72,23 +71,28 @@
            :repo "tecosaur/org-pandoc-import"
            :files ("*.el" "filters" "preprocessors")))
 (package! orgdiff :recipe (:host github :repo "tecosaur/orgdiff"))
-(package! engrave-faces :recipe (:host github :repo "tecosaur/engrave-faces")) ;; pretty code block output without minted
+(package! engrave-faces) ;; pretty code block output without minted
 (package! ox-chameleon :recipe (:host github :repo "tecosaur/ox-chameleon"))  ;; make latex output look like your buffer
 (package! org-modern) ;;  faster org-prettification
 (package! org-transclusion)
+(package! laas)
 ;; end-org
 
 (package! company-emoji) ;; company backend to make typing emojis more convenient => :flu
 (package! tmr) ;; setting timers using a convenient notatio
 
-
-(package! theme-magic) ;; make our emacs theme apply to the terminal
-
 (package! magit-delta) ;; better diffs for magit
 
 ;; themes
 (package! ef-themes :recipe (:host github :repo "protesilaos/ef-themes" :branch "main")) ;; really pretty themes
+;; agda2 mode highlighting is only on later versions of modus
+(package! modus-themes :recipe (:host github :repo "protesilaos/modus-themes" :branch "main"))
 
+(package! wgsl-mode.el :recipe (:host github :repo "KeenS/wgsl-mode.el"))
 ;; why not
-(unpin! lsp-mode)
-(package! evil-escape :disable t) ;; don't use this:  jk to get out of evil mode
+;; (unpin! lsp-mode)
+;; running into some bugs with M-H
+;; (unpin! treemacs)
+;; (unpin! dap-mode)
+(package! evil-escape :disable t) ;; i don't use this:  jk to get out of evil mode
+;; (unpin! eglot)
