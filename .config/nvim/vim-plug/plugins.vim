@@ -5,22 +5,12 @@ call plug#begin('~/.config/nvim/autoload/plugged')
     Plug 'scrooloose/NERDTree'
     " Auto pairs for '(' '[' '{'
     Plug 'jiangmiao/auto-pairs'
-    " VimTex
-     Plug 'lervag/vimtex'
-    " Track the engine.
-    "    Plug 'SirVer/ultisnips'
-    " Snippets are separated from the engine. Add this if you want them:
-    Plug 'honza/vim-snippets'
-    " Molokai Theme
-    Plug 'tomasr/molokai'
     " Airline status
     Plug 'vim-airline/vim-airline' 
     " Airline themes
     Plug 'vim-airline/vim-airline-themes'
     " Coc autocompletion and more
     Plug 'neoclide/coc.nvim', {'branch': 'release'}    
-    " Monokai pro theme
-    Plug 'phanviet/vim-monokai-pro'
     " Monokai pro alternative theme
     Plug 'sainnhe/sonokai'
     Plug 'sainnhe/edge'
