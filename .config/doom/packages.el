@@ -56,10 +56,6 @@
 (package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
 (package! numpydoc)           ;; add numpy-style docs to python code
 
-;; irc setup
-(package! znc)
-(package! erc-hl-nicks)
-
 ;; good-ass screenshots
 (package! screenshot :recipe (:host github :repo "tecosaur/screenshot" :branch "master" :build (:not compile)))
 
@@ -88,11 +84,11 @@
 ;; agda2 mode highlighting is only on later versions of modus
 (package! modus-themes :recipe (:host github :repo "protesilaos/modus-themes" :branch "main"))
 
-(package! wgsl-mode.el :recipe (:host github :repo "KeenS/wgsl-mode.el"))
-;; why not
-;; (unpin! lsp-mode)
-;; running into some bugs with M-H
-;; (unpin! treemacs)
-;; (unpin! dap-mode)
 (package! evil-escape :disable t) ;; i don't use this:  jk to get out of evil mode
-;; (unpin! eglot)
+
+(package! org-present) ;; it's in the name
+
+(package! impatient-mode) ; the live server for html
+
+;; the best typing you'll ever have
+(package! selectric-mode :recipe (:host github :repo "hydrobeam/selectric-mode"))

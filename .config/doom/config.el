@@ -1,10 +1,10 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
-
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 
 (set-file-template! "\\.org$" :trigger "__org" :mode 'org-mode)
+
 
 (setq user-full-name "Laith Bahodi"
       user-mail-address "laithbahodi@gmail.com")
@@ -16,7 +16,7 @@
 
 (visual-line-mode)
 ;; for spell-fu
-(setq ispell-dictionary "en_GB")
+(setq ispell-dictionary "en_CA")
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -25,6 +25,12 @@
 ;; get rid of those little things on the side
 ;; helps space out the buffer but idc :cold_face:
 (setq fringe-styles "no-fringes")
+
+
+;;; drag and drop
+;; allows you to drag the modeline name and yank the file
+(setq mouse-drag-mode-line-buffer t)
+(setq mouse-drag-and-drop-region t)
 
 
 ;; save on window switch
@@ -39,17 +45,39 @@
 ;; nice font + big font size
 (setq doom-font (font-spec :family "Jetbrains Mono" :size 13.5))
 
-;; modus theme config
+;;; modus theme config
+
 (setq modus-themes-bold-constructs t)
-;; add colour to modeline
-(setq modus-themes-mode-line '(accented borderless))
-(setq modus-themes-hl-line '())
-(setq modus-themes-syntax '(green-strings))
-(setq modus-themes-region '(bg-only))
+
+;; from https://protesilaos.com/emacs/modus-themes#h:df1199d8-eaba-47db-805d-6b568a577bf3
+(setq modus-themes-common-palette-overrides
+      '(
+        ;; colours for the modeline
+        (bg-mode-line-active bg-blue-subtle)
+        (fg-mode-line-active fg-main)
+        (border-mode-line-active bg-blue-subtle)
+
+        ;; makes highlighting background less dark
+        (bg-region bg-dim)
+
+        ;; makes highlighting still show colour
+        (fg-region unspecified)
+
+        ;; intense (more contrast) numbers for line numbers
+        (fg-line-number-inactive fg-main)
+        (fg-line-number-active fg-main)
+
+        ;; invisible background for line numbers
+        (bg-line-number-inactive unspecified)
+        (bg-line-number-active unspecified)
+
+        ;; invisible fringe:
+        (fringe unspecified)
+        ))
+
+;; gives org-mode blocks a coloured background
 (setq modus-themes-org-blocks 'tinted-background)
-(setq modus-themes-fringes '())
-(setq modus-themes-markup '(italic bold intense background))
-(setq modus-themes-paren-match '(underline))
+
 
 
 ;; make every background pitch black
@@ -58,6 +86,11 @@
         (bg-dim . "#000000")  ; default is #f8f8f8
         (bg-alt . "#000000")  ; default is #f0f0f0
         ))
+
+(setq-default pixel-scroll-precision-mode t)
+(use-package! rainbow-mode
+  :defer t
+  :hook (prog-mode text-mode))
 
 (setq doom-theme 'modus-vivendi)
 
@@ -98,6 +131,10 @@
   (setq doom-themes-treemacs-theme "doom-colors")
   )
 
+(map!
+ :mode treemacs-mode
+ :desc "yeah" "D" #'treemacs-remove-project-from-workspace)
+
 (use-package! screenshot
   :defer t
   :config
@@ -108,14 +145,13 @@
   )
 
 
+
+(+ 12 2)
 (defun znc-register ()
   (interactive)
   (setq znc-servers
-        `(
-          (,(+pass-get-secret "csc-znc-server") 6697 t
-           ((libera "lbahodi" ,(+pass-get-secret "csc-znc-password")
-                    ))))
-        )
+        `((,(+pass-get-secret "csc-znc-server") 6697 t
+           ((libera "lbahodi" ,(+pass-get-secret "csc-znc-password"))))))
   )
 
 (use-package! notifications
@@ -189,6 +225,12 @@
   )
 
 
+(use-package! cpp-mode
+  :defer t
+  :config
+  (add-to-list 'lsp-clients-clangd-args "-std=c++14")
+  )
+
 (use-package! erc-hl-nicks
   :after erc
   :config
@@ -209,16 +251,25 @@
 
 ;; ORG MODE SETUP STARTS HERE
 
+(use-package! auto-capitalize
+  :defer t
+  :config
+  (setq auto-capitalize-words `("I" "English"))
+  )
+
 (use-package! laas
   :hook ((LaTeX-mode org-mode) . laas-mode)
   :config
   ;; (setq laas-use-unicode t) ;; unicode >>
-  (aas-set-snippets 'org-mode
+  (aas-set-snippets 'laas-mode
+    :cond #'texmathp ; expand only while in math
     ";1" "⊢"
     ";2" "⊥"
+    "Sum" (lambda () (interactive)
+            (yas-expand-snippet "\\sum_{$1^{$2} $0"))
     )
-
   )
+
 
 
 ;; this is from teco to make ox-chameleon work
@@ -304,16 +355,13 @@
 (defun insert-clipboard-image (&optional file)
   "Asks for a file to paste & link the contents of the clipboard"
   (interactive "F")
-  (shell-command (concat "xclip -selection clipboard -t image/jpg -o > " file ".jpg"))
+  (async-shell-command (concat "xclip -selection clipboard -t image/jpg -o > " file ".jpg"))
   (insert
    (cond
     ((derived-mode-p 'org-mode)(concat "[[" file ".jpg]]") )
     ((derived-mode-p 'markdown-mode) (concat "[](" file ".jpg)"))
-    (t (user-error "Invalid/unsupported mode"))
-    )
-   )
-  (org-display-inline-images)
-  )
+    (t (user-error "Invalid/unsupported mode"))))
+  (org-display-inline-images))
 
 
 (defun dw/org-mode-setup ()
@@ -326,7 +374,7 @@
 
 (after! org
   (setq org-todo-keywords
-        '((sequence "TODO(t)" "IDEA(i)" "HOLD(h)" "|" "DONE(d)" "CANCELLED(c)" "FAILED(f)")
+        '((sequence "TODO(t)" "IDEA(i)" "HOLD(h)" "|" "DONE(d)" "CANCELLED(c)" "FAILED(f)" "REVIEW(r)")
           ;; (sequence "[ ](T)" "[-](S)" "|" "[X](D)")
           ;; (sequence "|" "OKAY(o)" "YES(y)" "NO(n)")
           ))
@@ -337,7 +385,9 @@
                 '(
                   ("IDEA" . (:foreground "cyan" :weight "bold"))
                   ("FAILED" . (:foreground "red" :weight "bold"))
-                  ("CANCELlED" . (:foreground "red" :weight "bold"))))))
+                  ("CANCELlED" . (:foreground "red" :weight "bold"))
+                  ("REVIEW" . (:foreground "#b6a0fb" :weight "bold"))
+                  ))))
 
 
 (use-package! org-pomodoro
@@ -380,10 +430,10 @@
                         ;; utility in multi-day views.
                         (org-agenda-day-face-function (lambda (date) 'org-agenda-date))
                         (org-agenda-format-date "%A %-e %B %Y")))
-            (agenda "" ((org-agenda-overriding-header "\nNext three days\n")
+            (agenda "" ((org-agenda-overriding-header "\nNext seven days\n")
                         (org-agenda-start-on-weekday nil)
                         (org-agenda-start-day "+1d")
-                        (org-agenda-span 3)
+                        (org-agenda-span 7)
                         (org-deadline-warning-days 0)
                         (org-agenda-block-separator nil)
                         (org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))))
@@ -406,6 +456,23 @@
   :defer t
   :config
   (setq orderless-component-separator #'orderless-escapable-split-on-space)
+  )
+
+(use-package! ox-pollen
+  :after ox
+  )
+(after! 'ox
+  (org-export-define-backend 'msc
+                             '((link . ,(lambda (code contents info) (format "code: %s\n contents: %s\n info: %s\n" code contents info)))
+                               (paragraph         . (lambda (x) x))
+                               )
+                             ;; :menu-entry
+                             ;; '(?x "Export to Pollen"
+                             ;;  ((?P "As pollen buffer"
+                             ;;       (lambda (a s v b)
+                             ;;         (org-export-to-buffer 'msc "*pollen buffer exports*")))))
+                             )
+
   )
 (use-package! ox-chameleon
   :after ox-latex)
@@ -463,6 +530,9 @@
 
   ;; makes latex preview bigger
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
+
+
+
   )
 
 (use-package! engrave-faces-latex
@@ -482,15 +552,33 @@
   :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
                 mouse-wheel-progressive-speed nil))
 
+(use-package! latex-preview-pane-mode
+  :defer t
+  :config
+  (setq pdf-latex-command "lualatex")
+  (setq shell-escape-mode t)
+  ;; (add-hook 'latex-mode-hook (lambda () 'TeX-clean))
+  )
+
 (use-package! rustic
   :defer t
   :config
+  ;; add rustup rust-analyzer and pipe err to devnull in case of booboos
+  (add-to-list 'exec-path
+               (file-name-directory (shell-command-to-string "rustup which --toolchain nightly rust-analyzer 2>/dev/null")))
   (setq lsp-rust-analyzer-server-display-inlay-hints t)
   (setq lsp-rust-server 'rust-analyzer)
+
+  (setq rustic-test-arguments "-- --nocapture")
   )
 
+(use-package! racket-mode
+  :defer t
+  :config
+  (setq racket-shell-or-terminal-function 'racket-vterm)
+  )
 ;; (setq lsp-eslint-server-command '("node" "/usr/bin/vscode-eslint-language-server" "--stdio"))
-; (setq lsp-eslint-server-command '("node" "/usr/bin/deno" "--stdio"))
+;; (setq lsp-eslint-server-command '("deno" "lsp"))
 
 ;; (after! eglot
 ;; (add-to-list 'eglot-server-programs '((js-mode typescript-mode) . (eglot-deno "deno" "lsp")))
@@ -504,8 +592,9 @@
 ;;     :lint t))
 ;;   )
 
-(set-company-backend! 'prog-mode 'company-capf 'company-emoji  'company-files)
-(set-company-backend! 'text-mode 'company-capf 'company-files 'company-emoji)
+(set-company-backend! 'prog-mode 'company-capf 'company-files)
+(set-company-backend! '(text-mode org-journal-mode) 'company-capf 'company-files 'company-emoji)
+;; (set-company-backend! 'text-mode 'company-capf 'company-files 'company-emoji)
 (delete 'company-yasnippet +lsp-company-backends)
 
 ;; makes it so that you can page through the preview that pops when you write
@@ -540,30 +629,28 @@
  "i k" #'insert-kaomoji)
 (visual-line-mode)
 
-;; (map!
-;;  :desc "Move up visual line"
-;;  :nv
-;;  "j" #'evil-next-visual-line)
+(map!
+ :desc "Move up visual line"
+ :nv
+ "j" #'evil-next-visual-line)
 
-;; (map!
-;;  :desc "Move down visual line"
-;;  :nv
-;;  "k" #'evil-previous-visual-line)
+(map!
+ :desc "Move down visual line"
+ :nv
+ "k" #'evil-previous-visual-line)
 
-;; (map!
-;;  :desc "Move to end of visual line"
-;;  :nv
-;;  "$" #'evil-end-of-visual-line)
+(map!
+ :desc "Move to end of visual line"
+ :nv
+ "$" #'evil-end-of-visual-line)
 
-;; (map!
-;;  :desc "Move to beginning of visual line"
-;;  :nv
-;;  "0" #'evil-beginning-of-visual-line)
+(map!
+ :desc "Move to beginning of visual line"
+ :nv
+ "0" #'evil-beginning-of-visual-line)
 
-;; (map!
-;;  :desc "Move to end of visual line"
-;;  :nv
-;;  "$" #'evil-end-of-visual-line)
+
+(evil-visual-line)
 
 (map!
  :leader
@@ -583,7 +670,7 @@
   (interactive)
   (let* ((src (file-name-nondirectory (buffer-file-name)))
          (exe (file-name-sans-extension src)))
-    (compile (concat "g++ " src  " -Wall -g " " -std=c++14 " " -o " exe ".out && ./" exe ".out" )
+    (compile (concat "g++ " src  " -Wall -g " " -std=c++17 " " -o " exe ".out && ./" exe ".out" )
              t)))
 
 ;; these don't work very well since they eliminate non-text characters
@@ -626,7 +713,6 @@
 ;;; config.el ends here
 
 
-
 ;; https://tecosaur.github.io/emacs-config/config.html#smerge
 (defun smerge-repeatedly ()
   "Perform smerge actions again and again"
@@ -662,6 +748,33 @@
   (sp-local-pair '(c++-mode objc-mode)
                  "<" ">"
                  :actions :rem)
-  (sp-local-pair '(org-mode)
+  (sp-local-pair '(org-cdlatex-mode)
                  "$" "$")
+  )
+
+
+(use-package! langtool
+  :defer t
+  :init  (setq langtool-default-language "en-CA")
+  :config
+  (setq langtool-bin (executable-find "languagetool"))
+  (setq langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*")
+  )
+
+
+;; from teco
+(after! evil
+  (setq evil-ex-substitute-global t     ; I like my s/../.. to by global by default
+        evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring
+
+(use-package typst-mode)
+
+(after! lsp-julia
+  (setq lsp-julia-default-environment "~/.julia/environments/v1.6"))
+
+(use-package! simple-httpd
+  :defer t
+  :config
+  (setq httpd-host "localhost")
+  (setq httpd-port 8079)
   )
