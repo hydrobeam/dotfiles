@@ -1,0 +1,83 @@
+[colors.bright]
+black = "#595959"
+blue = "#79a8ff"
+cyan = "#6ae4b9"
+green = "#70b900"
+magenta = "#b6a0ff"
+red = "#ef8b50"
+white = "#ffffff"
+yellow = "#c0c530"
+
+[colors.normal]
+black = "#000000"
+blue = "#2fafff"
+cyan = "#00d3d0"
+green = "#44bc44"
+magenta = "#feacd0"
+red = "#ff8059"
+white = "#bfbfbf"
+yellow = "#d0bc00"
+
+[colors.primary]
+background = "#000000"
+foreground = "#ffffff"
+
+[cursor.style]
+shape = "Beam"
+
+[font]
+size = 13.5
+
+[font.bold]
+family = "FiraCode Nerd Font"
+style = "Bold"
+
+[font.glyph_offset]
+x = 0
+y = 0
+
+[font.italic]
+family = "FiraCode Nerd Font"
+style = "Italic"
+
+[font.normal]
+family = "FiraCode Nerd Font"
+style = "Regular"
+
+[font.offset]
+x = 0
+y = 0
+
+[[keyboard.bindings]]
+chars = "\u0017"
+key = "Back"
+mods = "Control"
+
+[[keyboard.bindings]]
+action = "Paste"
+key = "V"
+mods = "Control"
+
+[scrolling]
+history = 10000
+multiplier = 3
+
+[selection]
+save_to_clipboard = true
+
+[window]
+class = "Alacritty"
+decorations = "none"
+dynamic_padding = false
+
+[window.dimensions]
+columns = 112
+lines = 28
+
+[window.padding]
+x = 8
+y = 8
+
+[window.position]
+x = 160
+y = 168
