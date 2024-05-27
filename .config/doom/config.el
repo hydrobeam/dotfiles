@@ -6,6 +6,10 @@
 (set-file-template! "\\.org$" :trigger "__org" :mode 'org-mode)
 
 
+
+;; (setq doom-emoji-fallback-font-families "Apple Color Emoji")
+(setq doom-emoji-font "Apple Color Emoji")
+
 (setq user-full-name "Laith Bahodi"
       user-mail-address "laithbahodi@gmail.com")
 
@@ -80,14 +84,25 @@
 
 
 
+
 ;; make every background pitch black
+
 (setq modus-themes-vivendi-color-overrides
       '(
         (bg-dim . "#000000")  ; default is #f8f8f8
         (bg-alt . "#000000")  ; default is #f0f0f0
         ))
 
-(setq-default pixel-scroll-precision-mode t)
+(pixel-scroll-precision-mode)
+(setq pixel-scroll-precision-use-momentum t)
+;; (setq pixel-scroll-precision-initial-velocity-factor 0.008)
+;; (use-package pixel-scroll-precision
+;;   :config
+;;   ;; the original value of 0.008375 is too fast and causes stuttering
+(setq pixel-scroll-precision-initial-velocity-factor 0.008375)
+;; ;; (setq pixel-scroll-precision-interpolation-between-scroll 0.001)
+;; ;;   (setq pixel-scroll-precision-momentum-seconds 1.25)
+;;   )
 (use-package! rainbow-mode
   :defer t
   :hook (prog-mode text-mode))
@@ -108,9 +123,12 @@
   :defer t
   :config
   (display-time-mode 1)
-  (setq doom-modeline-time-icon t)
-  (setq doom-modeline-height 62)
+  (display-battery-mode 1)
+  (setq doom-modeline-time-icon nil)
+  (setq doom-modeline-height 54)
+  (setq mode-line-position-column-line-format nil)
   )
+
 
 (use-package! vterm
   :defer t
@@ -121,6 +139,8 @@
          "T" #'vterm))
   )
 
+
+
 (use-package! treemacs
   :defer t
   :config
@@ -129,11 +149,16 @@
   ;; alters file icons to be more vscode-esque (better)
   ;; https://github.com/doomemacs/themes/wiki/Extension:-Treemacs
   (setq doom-themes-treemacs-theme "doom-colors")
+  (setq treemacs-user-mode-line-format 'none)
   )
 
 (map!
  :mode treemacs-mode
  :desc "yeah" "D" #'treemacs-remove-project-from-workspace)
+
+(defun my-c-mode-hook ()
+  (setq c-basic-offset 2))
+(add-hook 'c-mode-common-hook 'my-c-mode-hook)
 
 (use-package! screenshot
   :defer t
@@ -144,9 +169,6 @@
   (setq screenshot-truncate-lines-p t)
   )
 
-
-
-(+ 12 2)
 (defun znc-register ()
   (interactive)
   (setq znc-servers
@@ -228,7 +250,7 @@
 (use-package! cpp-mode
   :defer t
   :config
-  (add-to-list 'lsp-clients-clangd-args "-std=c++14")
+  ;; (add-to-list 'lsp-clients-clangd-args "-std=c++14")
   )
 
 (use-package! erc-hl-nicks
@@ -251,6 +273,16 @@
 
 ;; ORG MODE SETUP STARTS HERE
 
+(use-package! ox-reveal :after ox)
+
+(use-package! org-transclusion
+  :after org
+  :init
+  (map!
+   :leader
+   :prefix "n"
+   :desc "Org Transclusion Mode" "t" #'org-transclusion-mode))
+
 (use-package! auto-capitalize
   :defer t
   :config
@@ -262,12 +294,12 @@
   :config
   ;; (setq laas-use-unicode t) ;; unicode >>
   (aas-set-snippets 'laas-mode
-    :cond #'texmathp ; expand only while in math
-    ";1" "⊢"
-    ";2" "⊥"
-    "Sum" (lambda () (interactive)
-            (yas-expand-snippet "\\sum_{$1^{$2} $0"))
-    )
+                    :cond #'texmathp ; expand only while in math
+                    ";1" "⊢"
+                    ";2" "⊥"
+                    "sum" (lambda () (interactive)
+                            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+                    )
   )
 
 
@@ -275,6 +307,7 @@
 ;; this is from teco to make ox-chameleon work
 ;; https://github.com/tecosaur/emacs-config/blob/master/config.org#class-templates
 (after! ox-latex
+
 
   ;; deletes generated .tex files
   (add-to-list 'org-latex-logfiles-extensions "tex")
@@ -358,8 +391,8 @@
   (async-shell-command (concat "xclip -selection clipboard -t image/jpg -o > " file ".jpg"))
   (insert
    (cond
-    ((derived-mode-p 'org-mode)(concat "[[" file ".jpg]]") )
-    ((derived-mode-p 'markdown-mode) (concat "[](" file ".jpg)"))
+    ((derived-mode-p 'org-mode)(concat "[[./" (f-relative file) ".jpg]]") )
+    ((derived-mode-p 'markdown-mode) (concat "[](./" (f-relative file) ".jpg)"))
     (t (user-error "Invalid/unsupported mode"))))
   (org-display-inline-images))
 
@@ -373,6 +406,10 @@
   )
 
 (after! org
+
+  (defun my-org-mode-hook ()
+    (add-hook 'completion-at-point-functions 'pcomplete-completions-at-point nil t))
+  (add-hook 'org-mode-hook #'my-org-mode-hook)
   (setq org-todo-keywords
         '((sequence "TODO(t)" "IDEA(i)" "HOLD(h)" "|" "DONE(d)" "CANCELLED(c)" "FAILED(f)" "REVIEW(r)")
           ;; (sequence "[ ](T)" "[-](S)" "|" "[X](D)")
@@ -452,28 +489,13 @@
 
 ;; lets you do something like "SPC\ h" when searching
 
+
 (use-package! orderless
   :defer t
   :config
   (setq orderless-component-separator #'orderless-escapable-split-on-space)
   )
 
-(use-package! ox-pollen
-  :after ox
-  )
-(after! 'ox
-  (org-export-define-backend 'msc
-                             '((link . ,(lambda (code contents info) (format "code: %s\n contents: %s\n info: %s\n" code contents info)))
-                               (paragraph         . (lambda (x) x))
-                               )
-                             ;; :menu-entry
-                             ;; '(?x "Export to Pollen"
-                             ;;  ((?P "As pollen buffer"
-                             ;;       (lambda (a s v b)
-                             ;;         (org-export-to-buffer 'msc "*pollen buffer exports*")))))
-                             )
-
-  )
 (use-package! ox-chameleon
   :after ox-latex)
 
@@ -531,8 +553,6 @@
   ;; makes latex preview bigger
   (setq org-format-latex-options (plist-put org-format-latex-options :scale 2.0))
 
-
-
   )
 
 (use-package! engrave-faces-latex
@@ -544,33 +564,38 @@
 
 (use-package! magit-delta
   :hook (magit-mode . magit-delta-mode))
-;; ORG MODE CONFIG ENDS HERE
 
-;; copied from https://github.com/ianyepan/yay-evil-emacs/
-(use-package! mwheel
-  :defer t
-  :config (setq mouse-wheel-scroll-amount '(2 ((shift) . 1))
-                mouse-wheel-progressive-speed nil))
+;; ORG MODE CONFIG ENDS HERE
 
 (use-package! latex-preview-pane-mode
   :defer t
   :config
+  (setq shell-escape-mode "-shell-escape")
   (setq pdf-latex-command "lualatex")
-  (setq shell-escape-mode t)
-  ;; (add-hook 'latex-mode-hook (lambda () 'TeX-clean))
   )
 
+(after! lsp-mode
+  ;; https://github.com/emacs-lsp/lsp-mode/issues/3577#issuecomment-1709232622
+  (delete 'lsp-terraform lsp-client-packages)
+
+  (setq lsp-inlay-hint-enable t)
+  (set-face-attribute 'lsp-inlay-hint-face nil :height 0.8 :slant 'italic)
+  ;; (custom-set-faces lsp-inlay-hint-face
+  ;;                   :height 0.8)
+  )
 (use-package! rustic
   :defer t
   :config
   ;; add rustup rust-analyzer and pipe err to devnull in case of booboos
   (add-to-list 'exec-path
                (file-name-directory (shell-command-to-string "rustup which --toolchain nightly rust-analyzer 2>/dev/null")))
-  (setq lsp-rust-analyzer-server-display-inlay-hints t)
   (setq lsp-rust-server 'rust-analyzer)
 
   (setq rustic-test-arguments "-- --nocapture")
+  (setq rustic-indent-offset 4)
   )
+
+(add-to-list '+format-on-save-disabled-modes 'rustic-mode)
 
 (use-package! racket-mode
   :defer t
@@ -580,22 +605,34 @@
 ;; (setq lsp-eslint-server-command '("node" "/usr/bin/vscode-eslint-language-server" "--stdio"))
 ;; (setq lsp-eslint-server-command '("deno" "lsp"))
 
-;; (after! eglot
-;; (add-to-list 'eglot-server-programs '((js-mode typescript-mode) . (eglot-deno "deno" "lsp")))
 
-;;   (defclass eglot-deno (eglot-lsp-server) ()
-;;     :documentation "A custom class for deno lsp.")
-
-;;   (cl-defmethod eglot-initialization-options ((server eglot-deno))
-;;     "Passes through required deno initialization options"
-;;     (list :enable t
-;;     :lint t))
-;;   )
 
 (set-company-backend! 'prog-mode 'company-capf 'company-files)
-(set-company-backend! '(text-mode org-journal-mode) 'company-capf 'company-files 'company-emoji)
+(set-company-backend! 'text-mode 'company-capf 'company-files 'company-emoji)
+(set-company-backend! 'org-mode 'company-capf 'company-files 'company-emoji)
 ;; (set-company-backend! 'text-mode 'company-capf 'company-files 'company-emoji)
+;;
+
+
 (delete 'company-yasnippet +lsp-company-backends)
+
+(after! company-box
+  (setq company-box-doc-frame-parameters '(
+                                           (internal-border-width . 10)
+                                           (border-width . 400)
+                                           ))
+  ;; default is 0.5
+  (setq company-box-doc-delay 0.25)
+
+  (defun make-frame-coloured (frame) (set-face-attribute 'child-frame-border frame
+                                                         :background (face-background 'border)) frame)
+
+  (advice-add 'company-box-doc--make-frame :filter-return #'make-frame-coloured)
+
+  ;; (set-face-attribute 'child-frame-border nil :background "orange")
+  ;; (setq company-box-frame-parameters)
+  )
+
 
 ;; makes it so that you can page through the preview that pops when you write
 ;; a command with <C-h>
@@ -627,7 +664,6 @@
  :leader
  :desc "Kaomoji"
  "i k" #'insert-kaomoji)
-(visual-line-mode)
 
 (map!
  :desc "Move up visual line"
@@ -649,16 +685,6 @@
  :nv
  "0" #'evil-beginning-of-visual-line)
 
-
-(evil-visual-line)
-
-(map!
- :leader
- (:prefix ("e" . "execute")
-  :desc "Switch to ERC Buffer"
-  "e" #'erc-switch-to-buffer))
-
-
 ;; compile and run cpp file in active buffer
 (map! :leader
       (:prefix ("e" . "execute")
@@ -670,7 +696,7 @@
   (interactive)
   (let* ((src (file-name-nondirectory (buffer-file-name)))
          (exe (file-name-sans-extension src)))
-    (compile (concat "g++ " src  " -Wall -g " " -std=c++17 " " -o " exe ".out && ./" exe ".out" )
+    (compile (concat "gcc " src  " -g " " -std=c17 " "-O1" " -o " exe ".out && ./" exe ".out" )
              t)))
 
 ;; these don't work very well since they eliminate non-text characters
@@ -749,28 +775,20 @@
                  "<" ">"
                  :actions :rem)
   (sp-local-pair '(org-cdlatex-mode)
-                 "$" "$")
-  )
+                 "$" "$"))
 
-
-(use-package! langtool
+(use-package! tramp
   :defer t
-  :init  (setq langtool-default-language "en-CA")
   :config
-  (setq langtool-bin (executable-find "languagetool"))
-  (setq langtool-java-classpath "/usr/share/languagetool:/usr/share/java/languagetool/*")
-  )
-
+  (add-to-list 'tramp-remote-path 'tramp-own-remote-path))
 
 ;; from teco
 (after! evil
   (setq evil-ex-substitute-global t     ; I like my s/../.. to by global by default
         evil-kill-on-visual-paste nil)) ; Don't put overwritten text in the kill ring
 
-(use-package typst-mode)
-
 (after! lsp-julia
-  (setq lsp-julia-default-environment "~/.julia/environments/v1.6"))
+  (setq lsp-julia-default-environment "~/.julia/environments/v1.9"))
 
 (use-package! simple-httpd
   :defer t
@@ -778,3 +796,41 @@
   (setq httpd-host "localhost")
   (setq httpd-port 8079)
   )
+
+(use-package! selectric-mode
+  :defer t
+  :config
+  (setq selectric-process-linux "aplay")
+  )
+
+
+(use-package! pdf-view
+  :defer t
+  :config
+  (setq pdf-view-midnight-colors '("#ffffff" . "#000000")))
+
+(after! lean4-mode
+  (sp-with-modes 'lean-mode
+    (sp-local-pair "/-" "-/")
+    (sp-local-pair "`" "`")
+    (sp-local-pair "{" "}")
+    (sp-local-pair "«" "»")
+    (sp-local-pair "⟨" "⟩")
+    (sp-local-pair "⟪" "⟫"))
+  (map! :map lean4-mode-map
+        :localleader
+        :desc "Execute"               "R" #'lean4-execute
+        :desc "Execute in standalone" "r" #'lean4-std-exe
+        :desc "Toggle info buffer"    "t" #'lean4-toggle-info
+        (:prefix ("e" . "Error")
+         :desc "Previous error"       "p" #'flycheck-previous-error
+         :desc "Next error"           "n" #'flycheck-next-error
+         :desc "List error"           "l" #'flycheck-list-errors
+         )
+        :desc "Lake build"            "b" #'lean4-lake-build
+        (:prefix ("p" . "leanpkg")
+         :desc "Test"                 "t" #'lean4-leanpkg-test
+         :desc "Build"                "b" #'lean4-leanpkg-build
+         :desc "Configure"            "c" #'lean4-leanpkg-configure
+         )
+        ))

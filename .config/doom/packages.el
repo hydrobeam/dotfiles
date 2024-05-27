@@ -52,7 +52,7 @@
 (package! visual-fill-column) ;; center org mode
 (package! s)                  ;; string operations, mainly just for snake_case/camelCase
 (package! rmsbolt)            ;; see how a program is decoded
-(package! insert-kaomoji)     ;; emoji, but cute (◕‿◕)♡
+(package! insert-kaomoji)     ;; emoji, but cute ╚(•⌂•)╝ (◕‿◕)♡
 (package! rust-playground)    ;; allows spawning and running quick demo rust environments on the fly
 (package! numpydoc)           ;; add numpy-style docs to python code
 
@@ -70,8 +70,10 @@
 (package! engrave-faces) ;; pretty code block output without minted
 (package! ox-chameleon :recipe (:host github :repo "tecosaur/ox-chameleon"))  ;; make latex output look like your buffer
 (package! org-modern) ;;  faster org-prettification
-(package! org-transclusion)
-(package! laas)
+(package! org-transclusion) ;; put file in other file
+(package! laas) ;; latex auto activating snippets
+
+
 ;; end-org
 
 (package! company-emoji) ;; company backend to make typing emojis more convenient => :flu
@@ -82,13 +84,25 @@
 ;; themes
 (package! ef-themes :recipe (:host github :repo "protesilaos/ef-themes" :branch "main")) ;; really pretty themes
 ;; agda2 mode highlighting is only on later versions of modus
-(package! modus-themes :recipe (:host github :repo "protesilaos/modus-themes" :branch "main"))
+(package! modus-themes  :pin "ef71c8efb17930b2de3cca8b15bc85a44691452d" :recipe (:host github :repo "protesilaos/modus-themes"  ) )
+
+(package! protobuf-mode) ; ugh
 
 (package! evil-escape :disable t) ;; i don't use this:  jk to get out of evil mode
 
 (package! org-present) ;; it's in the name
-
 (package! impatient-mode) ; the live server for html
 
 ;; the best typing you'll ever have
 (package! selectric-mode :recipe (:host github :repo "hydrobeam/selectric-mode"))
+(package! org-reveal)       ;; presentations that are cool
+(package! org-transclusion) ;; put stuff from other files in your file
+
+;; fucks up my indentation settings for no reason
+(package! dtrt-indent :disable t)
+
+(package! lean4-mode :pin "d1c936409ade7d93e67107243cbc0aa55cda7fd5"
+        :recipe (:host github :repo "leanprover/lean4-mode" :files ("*.el" "data")))
+
+;; (unpin! lsp-mode)
+;; (unpin! treemacs)
