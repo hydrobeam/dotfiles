@@ -127,6 +127,11 @@
   (setq doom-modeline-time-icon nil)
   (setq doom-modeline-height 54)
   (setq mode-line-position-column-line-format nil)
+  (setq doom-modeline-workspace-name t)
+  (setq doom-modeline-position-line-format '(""))
+  (setq doom-modeline-position-column-line-format '(""))
+  (setq doom-modeline-position-column-format '(""))
+  (setq doom-modeline-window-width-limit 30)
   )
 
 
@@ -294,12 +299,12 @@
   :config
   ;; (setq laas-use-unicode t) ;; unicode >>
   (aas-set-snippets 'laas-mode
-                    :cond #'texmathp ; expand only while in math
-                    ";1" "⊢"
-                    ";2" "⊥"
-                    "sum" (lambda () (interactive)
-                            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
-                    )
+    :cond #'texmathp ; expand only while in math
+    ";1" "⊢"
+    ";2" "⊥"
+    "sum" (lambda () (interactive)
+            (yas-expand-snippet "\\sum_{$1}^{$2} $0"))
+    )
   )
 
 
@@ -307,8 +312,6 @@
 ;; this is from teco to make ox-chameleon work
 ;; https://github.com/tecosaur/emacs-config/blob/master/config.org#class-templates
 (after! ox-latex
-
-
   ;; deletes generated .tex files
   (add-to-list 'org-latex-logfiles-extensions "tex")
 
@@ -384,6 +387,7 @@
 
 (use-package! org-pandoc-import :after org)
 
+;; REVIEW: just use yank-media with org9.7
 ;; https://stackoverflow.com/questions/17435995/paste-an-image-on-clipboard-to-emacs-org-mode-file-without-saving-it
 (defun insert-clipboard-image (&optional file)
   "Asks for a file to paste & link the contents of the clipboard"
@@ -500,7 +504,7 @@
   :after ox-latex)
 
 (after! org-src
-  (setq org-highlight-latex-and-related '(native script entities))
+  (setq org-highlight-latex-and-related '(native script entities latex))
   (add-to-list 'org-src-block-faces '("latex" (:inherit default :extend t)))
   (add-to-list 'org-src-block-faces '("rust" modus-themes-nuanced-yellow))
   )
@@ -523,7 +527,10 @@
   ;; must be initialized early
   (setq org-directory "~/org/")
   :config
+  (setq org-image-actual-width 285)
   (setq org-ellipsis " ▾")
+  (setq org-yank-image-save-method "images/")
+  (setq org-yank-dnd-method 'ask)
 
   ;; latex config
   ;; lualatex preview
@@ -559,7 +566,8 @@
   :after ox-latex
   :config
   (add-to-list 'org-latex-engraved-options '("linenos" "true"))
-  ;; (setq org-latex-engraved-theme "t") REVIEW: doesn't work atm
+  (setq org-latex-engraved-theme t) ;; REVIEW: doesn't work atm
+  (engrave-faces-use-theme doom-theme)
   )
 
 (use-package! magit-delta
@@ -769,6 +777,12 @@
       ("k" "kill current" (lambda () (interactive) (ignore-errors (smerge-kill-current)) (smerge-repeatedly)))
       ("q" "quit" (lambda () (interactive) (smerge-auto-leave)))]]))
 
+;; (use-package! cdlatex-mode
+;;   :defer t
+;;   :config
+;;   (map! )
+
+;;   )
 
 (after! smartparens
   (sp-local-pair '(c++-mode objc-mode)

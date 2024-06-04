@@ -67,7 +67,7 @@
            :repo "tecosaur/org-pandoc-import"
            :files ("*.el" "filters" "preprocessors")))
 (package! orgdiff :recipe (:host github :repo "tecosaur/orgdiff"))
-(package! engrave-faces) ;; pretty code block output without minted
+(package! engrave-faces :recipe (:host github :repo "tecosaur/engrave-faces")) ;; pretty code block output without minted
 (package! ox-chameleon :recipe (:host github :repo "tecosaur/ox-chameleon"))  ;; make latex output look like your buffer
 (package! org-modern) ;;  faster org-prettification
 (package! org-transclusion) ;; put file in other file
@@ -104,5 +104,6 @@
 (package! lean4-mode :pin "d1c936409ade7d93e67107243cbc0aa55cda7fd5"
         :recipe (:host github :repo "leanprover/lean4-mode" :files ("*.el" "data")))
 
+(unpin! org-mode)
 ;; (unpin! lsp-mode)
 ;; (unpin! treemacs)
