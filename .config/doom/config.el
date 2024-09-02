@@ -3,7 +3,7 @@
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets.
 
-(set-file-template! "\\.org$" :trigger "__org" :mode 'org-mode)
+(set-file-template! 'org-mode :trigger "default" :mode 'org-mode)
 
 
 
@@ -316,7 +316,7 @@
   (add-to-list 'org-latex-logfiles-extensions "tex")
 
 
-  ;; stolen from tecosaur to make ox-chameleon work
+;;   ;; stolen from tecosaur to make ox-chameleon work
   (let* ((article-sections '(("\\section{%s}" . "\\section*{%s}")
                              ("\\subsection{%s}" . "\\subsection*{%s}")
                              ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
@@ -504,7 +504,7 @@
   :after ox-latex)
 
 (after! org-src
-  (setq org-highlight-latex-and-related '(native script entities latex))
+  (setq org-highlight-latex-and-related '(entities latex script))
   (add-to-list 'org-src-block-faces '("latex" (:inherit default :extend t)))
   (add-to-list 'org-src-block-faces '("rust" modus-themes-nuanced-yellow))
   )
@@ -527,7 +527,7 @@
   ;; must be initialized early
   (setq org-directory "~/org/")
   :config
-  (setq org-image-actual-width 285)
+  (setq org-image-actual-width 385)
   (setq org-ellipsis " ▾")
   (setq org-yank-image-save-method "images/")
   (setq org-yank-dnd-method 'ask)
@@ -718,16 +718,17 @@
     (message "No region selected")))
 
 (defun lowerCamelCase (start end)
-  "Change selected text to snake case format"
+  "Change selected text to lowerCamelCase format"
   (interactive "r")
   (if (use-region-p)
       (let ((given-string (buffer-substring start end)))
         (delete-region start end)
         (insert (s-lower-camel-case given-string)))
-    (message "No region selected")))
+    (message "No region selected"))
+  )
 
 (defun UpperCamelCase (start end)
-  "Change selected text to snake case format"
+  "Change selected text to UpperCamelCase format"
   (interactive "r")
   (if (use-region-p)
       (let ((given-string (buffer-substring start end)))
@@ -736,7 +737,7 @@
     (message "No region selected")))
 
 (defun kebab-case (start end)
-  "Change selected text to snake case format"
+  "Change selected text to kebab case format"
   (interactive "r")
   (if (use-region-p)
       (let ((given-string (buffer-substring start end)))
